@@ -9,8 +9,18 @@ import yt_dlp
 
 app = FastAPI()
 
-# Dicionário em memória para armazenar o progresso das tarefas
 tasks_progress = {}
+
+# Configuração para evitar o bloqueio de bot do YouTube em servidores na nuvem
+COMMON_YDL_OPTS = {
+    "quiet": True,
+    "no_warnings": True,
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["android", "ios", "mweb", "web"]
+        }
+    }
+}
 
 class InfoRequest(BaseModel):
     url: str
@@ -27,7 +37,7 @@ def remove_file(path: str):
 @app.post("/api/info")
 def get_video_info(data: InfoRequest):
     try:
-        ydl_opts = {"quiet": True, "no_warnings": True}
+        ydl_opts = dict(COMMON_YDL_OPTS)
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(data.url, download=False)
             resolutions = set()
@@ -52,7 +62,6 @@ async def progress_stream(task_id: str):
             prog = tasks_progress.get(task_id, {"status": "waiting", "percent": 0})
             yield f"data: {prog.get('percent', 0)}|{prog.get('status', '')}\n\n"
             if prog.get("status") in ["finished", "error"]:
-                # Limpa a memória após concluir
                 tasks_progress.pop(task_id, None)
                 break
             await asyncio.sleep(0.4)
@@ -78,28 +87,20 @@ def download_video(data: DownloadRequest, background_tasks: BackgroundTasks):
         temp_dir = tempfile.mkdtemp()
         output_template = os.path.join(temp_dir, "%(title)s.%(ext)s")
         
+        ydl_opts = dict(COMMON_YDL_OPTS)
+        ydl_opts["outtmpl"] = output_template
+        ydl_opts["progress_hooks"] = [progress_hook]
+
         if data.resolution == "audio_only":
-            ydl_opts = {
-                "format": "bestaudio/best",
-                "outtmpl": output_template,
-                "progress_hooks": [progress_hook],
-                "postprocessors": [{
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                }],
-                "quiet": True,
-                "no_warnings": True
-            }
+            ydl_opts["format"] = "bestaudio/best"
+            ydl_opts["postprocessors"] = [{
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            }]
         else:
-            ydl_opts = {
-                "format": f"bestvideo[height<={data.resolution}]+bestaudio/best[height<={data.resolution}]",
-                "merge_output_format": "mp4",
-                "outtmpl": output_template,
-                "progress_hooks": [progress_hook],
-                "quiet": True,
-                "no_warnings": True
-            }
+            ydl_opts["format"] = f"bestvideo[height<={data.resolution}]+bestaudio/best[height<={data.resolution}]/best[height<={data.resolution}]/best"
+            ydl_opts["merge_output_format"] = "mp4"
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(data.url, download=True)
