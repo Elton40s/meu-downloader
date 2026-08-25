@@ -11,13 +11,12 @@ app = FastAPI()
 
 tasks_progress = {}
 
-# Configuração que contorna o bloqueio de bot do YouTube em servidores na nuvem
 COMMON_YDL_OPTS = {
     "quiet": True,
     "no_warnings": True,
     "extractor_args": {
         "youtube": {
-            "player_client": ["tv", "ios", "android_creator", "web_embedded"]
+            "player_client": ["web_safari", "web_embedded", "mweb"]
         }
     }
 }
