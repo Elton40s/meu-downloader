@@ -11,14 +11,11 @@ app = FastAPI()
 
 tasks_progress = {}
 
+# Configuração com cookies de autenticação
 COMMON_YDL_OPTS = {
     "quiet": True,
     "no_warnings": True,
-    "extractor_args": {
-        "youtube": {
-            "player_client": ["web_safari", "web_embedded", "mweb"]
-        }
-    }
+    "cookiefile": "cookies.txt",
 }
 
 class InfoRequest(BaseModel):
