@@ -42,8 +42,7 @@ def get_video_info(data: InfoRequest):
                 vcodec = f.get("vcodec")
                 if height and vcodec != "none":
                     resolutions.add(height)
-                # Pega a URL do fluxo direto do vídeo para reprodução no player
-                if f.get("url") and not direct_url and f.get("ext") == "mp4":
+                if f.get("url") and not direct_url:
                     direct_url = f.get("url")
             
             if not direct_url:
@@ -94,6 +93,7 @@ def download_video(data: DownloadRequest, background_tasks: BackgroundTasks):
         ydl_opts["outtmpl"] = output_template
         ydl_opts["progress_hooks"] = [progress_hook]
 
+        # Tratamento correto das qualidades para qualquer plataforma
         if data.resolution == "audio_only":
             ydl_opts["format"] = "bestaudio/best"
             ydl_opts["postprocessors"] = [{
@@ -101,6 +101,9 @@ def download_video(data: DownloadRequest, background_tasks: BackgroundTasks):
                 "preferredcodec": "mp3",
                 "preferredquality": "192",
             }]
+        elif data.resolution == "best" or not data.resolution.isdigit():
+            ydl_opts["format"] = "bestvideo+bestaudio/best"
+            ydl_opts["merge_output_format"] = "mp4"
         else:
             ydl_opts["format"] = f"bestvideo[height<={data.resolution}]+bestaudio/best[height<={data.resolution}]/best[height<={data.resolution}]/best"
             ydl_opts["merge_output_format"] = "mp4"
@@ -111,8 +114,10 @@ def download_video(data: DownloadRequest, background_tasks: BackgroundTasks):
             
             if data.resolution == "audio_only":
                 file_name = os.path.splitext(file_name)[0] + ".mp3"
-            elif not file_name.endswith(".mp4"):
-                file_name = os.path.splitext(file_name)[0] + ".mp4"
+            else:
+                base = os.path.splitext(file_name)[0]
+                if os.path.exists(base + ".mp4"):
+                    file_name = base + ".mp4"
 
         tasks_progress[task_id] = {"status": "finished", "percent": 100}
         background_tasks.add_task(remove_file, file_name)
