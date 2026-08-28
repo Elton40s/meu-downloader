@@ -43,26 +43,21 @@ def get_video_info(data: InfoRequest):
                 if height and vcodec != "none":
                     resolutions.add(height)
             
-            # Buscar a melhor URL direta para reprodução no player HTML5
+            # Detecta URL de embed para Tokyvideo ou similares
+            embed_url = None
+            video_id = info.get("id")
+            if "tokyvideo.com" in data.url:
+                embed_url = f"https://www.tokyvideo.com/embed/{video_id}"
+
             direct_url = info.get("url")
-            
-            # Filtra formatos mp4 que contêm tanto áudio quanto vídeo (prontos para tocar no navegador)
-            playable_formats = [
-                f for f in formats 
-                if f.get("ext") == "mp4" and f.get("vcodec") != "none" and f.get("acodec") != "none"
-            ]
-            
-            if playable_formats:
-                # Pega o formato unificado de melhor qualidade (o último da lista filtrada)
-                direct_url = playable_formats[-1].get("url")
-            elif not direct_url and formats:
-                # Se falhar, tenta pegar a URL geral de melhor qualidade
+            if formats and not direct_url:
                 direct_url = formats[-1].get("url")
 
             return {
                 "title": info.get("title"),
                 "thumbnail": info.get("thumbnail"),
                 "direct_url": direct_url,
+                "embed_url": embed_url,
                 "resolutions": sorted(list(resolutions), reverse=True)
             }
     except Exception as e:
