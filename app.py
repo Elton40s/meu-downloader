@@ -1,10 +1,10 @@
 import os
 import urllib.parse
+import urllib.request
 import asyncio
 import tempfile
-import requests
 from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 import yt_dlp
 
@@ -48,7 +48,7 @@ def get_video_info(data: InfoRequest):
             if formats and not direct_url:
                 direct_url = formats[-1].get("url")
 
-            # Rota interna de proxy para o player nunca dar tela branca ou erro de CORS
+            # Rota interna de proxy para o player
             proxy_stream_url = f"/api/stream?url={urllib.parse.quote(direct_url)}" if direct_url else None
 
             return {
@@ -63,12 +63,27 @@ def get_video_info(data: InfoRequest):
 @app.get("/api/stream")
 def stream_video(url: str):
     try:
-        req = requests.get(url, stream=True, timeout=15)
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Referer": "https://www.tokyvideo.com/"
+            }
+        )
+        response = urllib.request.urlopen(req, timeout=20)
+
+        def iter_stream():
+            while True:
+                chunk = response.read(1024 * 512)
+                if not chunk:
+                    break
+                yield chunk
+
         headers = {
-            "Content-Type": req.headers.get("Content-Type", "video/mp4"),
+            "Content-Type": response.headers.get("Content-Type", "video/mp4"),
             "Accept-Ranges": "bytes"
         }
-        return StreamingResponse(req.iter_content(chunk_size=1024 * 512), headers=headers)
+        return StreamingResponse(iter_stream(), headers=headers)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
