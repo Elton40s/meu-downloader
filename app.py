@@ -35,19 +35,30 @@ def get_video_info(data: InfoRequest):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(data.url, download=False)
             resolutions = set()
-            direct_url = None
             
-            for f in info.get("formats", []):
+            formats = info.get("formats", [])
+            for f in formats:
                 height = f.get("height")
                 vcodec = f.get("vcodec")
                 if height and vcodec != "none":
                     resolutions.add(height)
-                if f.get("url") and not direct_url:
-                    direct_url = f.get("url")
             
-            if not direct_url:
-                direct_url = info.get("url")
+            # Buscar a melhor URL direta para reprodução no player HTML5
+            direct_url = info.get("url")
             
+            # Filtra formatos mp4 que contêm tanto áudio quanto vídeo (prontos para tocar no navegador)
+            playable_formats = [
+                f for f in formats 
+                if f.get("ext") == "mp4" and f.get("vcodec") != "none" and f.get("acodec") != "none"
+            ]
+            
+            if playable_formats:
+                # Pega o formato unificado de melhor qualidade (o último da lista filtrada)
+                direct_url = playable_formats[-1].get("url")
+            elif not direct_url and formats:
+                # Se falhar, tenta pegar a URL geral de melhor qualidade
+                direct_url = formats[-1].get("url")
+
             return {
                 "title": info.get("title"),
                 "thumbnail": info.get("thumbnail"),
@@ -93,7 +104,6 @@ def download_video(data: DownloadRequest, background_tasks: BackgroundTasks):
         ydl_opts["outtmpl"] = output_template
         ydl_opts["progress_hooks"] = [progress_hook]
 
-        # Tratamento correto das qualidades para qualquer plataforma
         if data.resolution == "audio_only":
             ydl_opts["format"] = "bestaudio/best"
             ydl_opts["postprocessors"] = [{
