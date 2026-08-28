@@ -65,7 +65,7 @@
         }
 
         .container {
-            max-width: 680px;
+            max-width: 720px;
             width: 100%;
             margin: 0 auto;
             padding: 30px 20px;
@@ -158,8 +158,8 @@
             overflow: hidden;
             background: #000;
             margin-bottom: 15px;
+            min-height: 380px;
             position: relative;
-            min-height: 360px;
         }
 
         iframe, video {
@@ -255,9 +255,7 @@
         <p id="status-msg"></p>
 
         <div id="video-card">
-            <div class="player-container" id="player-container">
-                <!-- O player é inserido dinamicamente aqui -->
-            </div>
+            <div class="player-container" id="player-container"></div>
             
             <div id="video-title" class="video-title"></div>
 
@@ -322,12 +320,12 @@
                 videoTitle.innerText = data.title;
                 playerContainer.innerHTML = '';
 
-                // Se houver URL de embed nativa (Tokyvideo), usa o iframe para contornar bloqueio de CORS
                 if (data.embed_url) {
                     const iframe = document.createElement('iframe');
                     iframe.src = data.embed_url;
                     iframe.allow = "autoplay; fullscreen; picture-in-picture";
                     iframe.allowFullscreen = true;
+                    iframe.setAttribute("referrerpolicy", "origin");
                     playerContainer.appendChild(iframe);
                 } else if (data.direct_url) {
                     const video = document.createElement('video');

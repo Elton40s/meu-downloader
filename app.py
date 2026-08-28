@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import asyncio
 import tempfile
@@ -43,11 +44,16 @@ def get_video_info(data: InfoRequest):
                 if height and vcodec != "none":
                     resolutions.add(height)
             
-            # Detecta URL de embed para Tokyvideo ou similares
+            # Extrai o ID numérico correto para gerar o player embutido do Tokyvideo
             embed_url = None
-            video_id = info.get("id")
             if "tokyvideo.com" in data.url:
-                embed_url = f"https://www.tokyvideo.com/embed/{video_id}"
+                # Procura o ID numérico no final da URL
+                match = re.search(r'(\d+)$', data.url.strip("/"))
+                if match:
+                    numeric_id = match.group(1)
+                    embed_url = f"https://www.tokyvideo.com/embed/{numeric_id}"
+                else:
+                    embed_url = f"https://www.tokyvideo.com/embed/{info.get('id')}"
 
             direct_url = info.get("url")
             if formats and not direct_url:
