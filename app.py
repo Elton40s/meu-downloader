@@ -1,8 +1,8 @@
 import os
-import re
 import uuid
 import asyncio
 import tempfile
+from urllib.parse import urlparse
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from pydantic import BaseModel
@@ -44,14 +44,14 @@ def get_video_info(data: InfoRequest):
                 if height and vcodec != "none":
                     resolutions.add(height)
             
-            # Extrai o ID numérico correto para gerar o player embutido do Tokyvideo
+            # Gera a URL de embed correta para o Tokyvideo preservando a rota real
             embed_url = None
             if "tokyvideo.com" in data.url:
-                # Procura o ID numérico no final da URL
-                match = re.search(r'(\d+)$', data.url.strip("/"))
-                if match:
-                    numeric_id = match.group(1)
-                    embed_url = f"https://www.tokyvideo.com/embed/{numeric_id}"
+                parsed = urlparse(data.url)
+                path = parsed.path.replace("/br/video/", "/video/")
+                if path.startswith("/video/"):
+                    slug = path.replace("/video/", "")
+                    embed_url = f"https://www.tokyvideo.com/embed/{slug}"
                 else:
                     embed_url = f"https://www.tokyvideo.com/embed/{info.get('id')}"
 
