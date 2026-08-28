@@ -1,10 +1,10 @@
 import os
-import uuid
+import urllib.parse
 import asyncio
 import tempfile
-from urllib.parse import urlparse
+import requests
 from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse, Response
 from pydantic import BaseModel
 import yt_dlp
 
@@ -44,30 +44,33 @@ def get_video_info(data: InfoRequest):
                 if height and vcodec != "none":
                     resolutions.add(height)
             
-            # Gera a URL de embed correta para o Tokyvideo preservando a rota real
-            embed_url = None
-            if "tokyvideo.com" in data.url:
-                parsed = urlparse(data.url)
-                path = parsed.path.replace("/br/video/", "/video/")
-                if path.startswith("/video/"):
-                    slug = path.replace("/video/", "")
-                    embed_url = f"https://www.tokyvideo.com/embed/{slug}"
-                else:
-                    embed_url = f"https://www.tokyvideo.com/embed/{info.get('id')}"
-
             direct_url = info.get("url")
             if formats and not direct_url:
                 direct_url = formats[-1].get("url")
 
+            # Rota interna de proxy para o player nunca dar tela branca ou erro de CORS
+            proxy_stream_url = f"/api/stream?url={urllib.parse.quote(direct_url)}" if direct_url else None
+
             return {
                 "title": info.get("title"),
                 "thumbnail": info.get("thumbnail"),
-                "direct_url": direct_url,
-                "embed_url": embed_url,
+                "direct_url": proxy_stream_url or direct_url,
                 "resolutions": sorted(list(resolutions), reverse=True)
             }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/stream")
+def stream_video(url: str):
+    try:
+        req = requests.get(url, stream=True, timeout=15)
+        headers = {
+            "Content-Type": req.headers.get("Content-Type", "video/mp4"),
+            "Accept-Ranges": "bytes"
+        }
+        return StreamingResponse(req.iter_content(chunk_size=1024 * 512), headers=headers)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/progress/{task_id}")
 async def progress_stream(task_id: str):
