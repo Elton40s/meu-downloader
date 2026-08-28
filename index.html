@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YTDown - Player & Downloader</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Biblioteca para tocar streams .m3u8 / HLS do Tokyvideo -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
             --bg-color: #0d0e11;
@@ -165,7 +167,6 @@
             display: none;
         }
 
-        /* Player e Container de Vídeo */
         #video-card {
             display: none;
             background: var(--card-bg);
@@ -267,7 +268,7 @@
 
     <div class="container">
         <h1>Baixador & Player Online</h1>
-        <p class="subtitle">Cole o link do Tokyvideo, assista e baixe sem anúncios.</p>
+        <p class="subtitle">Cole o link do vídeo, assista e baixe sem anúncios.</p>
 
         <div class="search-box-wrapper">
             <input type="text" id="video-url" class="search-input" placeholder="Cole o link do vídeo aqui...">
@@ -281,11 +282,8 @@
         <p id="status-msg"></p>
 
         <div id="video-card">
-            <!-- Player HTML5 Integrado -->
             <div class="player-container">
-                <video id="video-player" controls playsinline preload="metadata">
-                    Seu navegador não suporta reprodução de vídeo.
-                </video>
+                <video id="video-player" controls playsinline></video>
             </div>
             
             <div id="video-title" class="video-title"></div>
@@ -317,6 +315,7 @@
         const progressBox = document.getElementById('progress-box');
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.getElementById('progress-text');
+        let hlsInstance = null;
 
         btnPaste.addEventListener('click', async () => {
             try {
@@ -349,13 +348,24 @@
                 if (!res.ok) throw new Error(data.detail || 'Falha ao processar vídeo');
 
                 videoTitle.innerText = data.title;
-                
-                // Configura o player com o fluxo direto e pôster
-                if (data.direct_url) {
-                    videoPlayer.src = data.direct_url;
-                }
                 if (data.thumbnail) {
                     videoPlayer.poster = data.thumbnail;
+                }
+
+                // Gerenciamento da reprodução (Suporte a MP4 e fluxos HLS .m3u8)
+                if (data.direct_url) {
+                    if (hlsInstance) {
+                        hlsInstance.destroy();
+                        hlsInstance = null;
+                    }
+
+                    if (data.direct_url.includes('.m3u8') && Hls.isSupported()) {
+                        hlsInstance = new Hls();
+                        hlsInstance.loadSource(data.direct_url);
+                        hlsInstance.attachMedia(videoPlayer);
+                    } else {
+                        videoPlayer.src = data.direct_url;
+                    }
                 }
 
                 resSelect.innerHTML = '';
