@@ -11,11 +11,9 @@ app = FastAPI()
 
 tasks_progress = {}
 
-# Configuração com cookies de autenticação
 COMMON_YDL_OPTS = {
     "quiet": True,
     "no_warnings": True,
-    "cookiefile": "cookies.txt",
 }
 
 class InfoRequest(BaseModel):
@@ -37,15 +35,24 @@ def get_video_info(data: InfoRequest):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(data.url, download=False)
             resolutions = set()
+            direct_url = None
+            
             for f in info.get("formats", []):
                 height = f.get("height")
                 vcodec = f.get("vcodec")
                 if height and vcodec != "none":
                     resolutions.add(height)
+                # Pega a URL do fluxo direto do vídeo para reprodução no player
+                if f.get("url") and not direct_url and f.get("ext") == "mp4":
+                    direct_url = f.get("url")
+            
+            if not direct_url:
+                direct_url = info.get("url")
             
             return {
                 "title": info.get("title"),
                 "thumbnail": info.get("thumbnail"),
+                "direct_url": direct_url,
                 "resolutions": sorted(list(resolutions), reverse=True)
             }
     except Exception as e:

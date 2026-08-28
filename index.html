@@ -3,162 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloader de Vídeos</title>
+    <title>YTDown - Player & Downloader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #0f172a; color: #f8fafc; }
-        .card { background: #1e293b; padding: 24px; border-radius: 12px; border: 1px solid #334155; }
-        input, select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-        input { background: #0f172a; border: 1px solid #475569; color: #fff; }
-        select { background: #0f172a; border: 1px solid #475569; color: #fff; }
-        button { background: #2563eb; color: #fff; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #1d4ed8; }
-        #video-details { margin-top: 20px; display: none; }
-        img { width: 100%; border-radius: 8px; margin-bottom: 12px; }
-        .status { margin-top: 12px; font-size: 14px; color: #94a3b8; text-align: center; }
+        :root {
+            --bg-color: #0d0e11;
+            --card-bg: #16181d;
+            --input-bg: #1c1f26;
+            --border-color: #2b2f3a;
+            --text-main: #ffffff;
+            --text-muted: #8e95a5;
+            --btn-red: #ff4757;
+            --btn-paste-bg: #ffd1d6;
+            --btn-paste-text: #e84118;
+            --btn-download-bg: #232730;
+            --btn-download-border: #353b48;
+        }
 
-        /* Estilos da Barra de Progresso */
-        .progress-container { width: 100%; background-color: #334155; border-radius: 8px; overflow: hidden; margin-top: 15px; display: none; }
-        .progress-bar { width: 0%; height: 16px; background-color: #10b981; transition: width 0.3s ease; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid #1a1d24;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: #ffffff;
+            color: #000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: #1c1f26;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-btn.menu {
+            background: var(--btn-red);
+            border: none;
+        }
+
+        .container {
+            max-width: 680px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+        }
+
+        .search-box-wrapper {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 1rem;
+            padding: 10px 14px;
+        }
+
+        .paste-btn {
+            background-color: var(--btn-paste-bg);
+            color: var(--btn-paste-text);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            width: 100%;
+            background-color: var(--btn-download-bg);
+            color: #fff;
+            border: 1px solid var(--btn-download-border);
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        #status-msg {
+            color: #ff5252;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        /* Player e Container de Vídeo */
+        #video-card {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .player-container {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 15px;
+        }
+
+        video {
+            width: 100%;
+            max-height: 380px;
+            display: block;
+        }
+
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .format-selection {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select {
+            flex: 1;
+            padding: 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 8px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .confirm-btn {
+            background: #00d2d3;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .progress-box {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .progress-bar-bg {
+            background: #2b2f3a;
+            border-radius: 20px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ff4757;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Download de Vídeo</h2>
-    <input type="text" id="url" placeholder="Cole a URL do vídeo aqui...">
-    <button onclick="buscarInfo()" id="btn-buscar">Analisar Vídeo</button>
+    <header>
+        <div class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-download"></i></div>
+            <span>YTDown</span>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn"><i class="fa-regular fa-sun"></i></button>
+            <button class="header-btn"><i class="fa-solid fa-globe"></i></button>
+            <button class="header-btn menu"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
 
-    <div id="video-details">
-        <img id="thumb" src="" alt="Thumbnail">
-        <h4 id="title" style="margin: 0 0 10px 0;"></h4>
-        
-        <label for="resolutions">Selecione a Qualidade:</label>
-        <select id="resolutions"></select>
-        
-        <button onclick="baixarVideo()" id="btn-download" style="background: #16a34a; margin-top: 15px;">Baixar Arquivo</button>
-        
-        <div class="progress-container" id="prog-box">
-            <div class="progress-bar" id="prog-bar"></div>
+    <div class="container">
+        <h1>Baixador & Player Online</h1>
+        <p class="subtitle">Cole o link do Tokyvideo, assista e baixe sem anúncios.</p>
+
+        <div class="search-box-wrapper">
+            <input type="text" id="video-url" class="search-input" placeholder="Cole o link do vídeo aqui...">
+            <button class="paste-btn" id="btn-paste"><i class="fa-solid fa-clipboard"></i> Colar</button>
+        </div>
+
+        <button class="action-btn" id="btn-analyze">
+            <i class="fa-solid fa-play"></i> Carregar Vídeo
+        </button>
+
+        <p id="status-msg"></p>
+
+        <div id="video-card">
+            <!-- Player HTML5 Integrado -->
+            <div class="player-container">
+                <video id="video-player" controls playsinline preload="metadata">
+                    Seu navegador não suporta reprodução de vídeo.
+                </video>
+            </div>
+            
+            <div id="video-title" class="video-title"></div>
+
+            <div class="format-selection">
+                <select id="res-select"></select>
+                <button class="confirm-btn" id="btn-start-download">Baixar Arquivo</button>
+            </div>
+
+            <div class="progress-box" id="progress-box">
+                <div class="progress-bar-bg">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Iniciando... 0%</div>
+            </div>
         </div>
     </div>
-    
-    <div id="status" class="status"></div>
-</div>
 
-<script>
-    let currentUrl = "";
+    <script>
+        const inputUrl = document.getElementById('video-url');
+        const btnPaste = document.getElementById('btn-paste');
+        const btnAnalyze = document.getElementById('btn-analyze');
+        const statusMsg = document.getElementById('status-msg');
+        const videoCard = document.getElementById('video-card');
+        const videoPlayer = document.getElementById('video-player');
+        const videoTitle = document.getElementById('video-title');
+        const resSelect = document.getElementById('res-select');
+        const btnStartDownload = document.getElementById('btn-start-download');
+        const progressBox = document.getElementById('progress-box');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
 
-    async function buscarInfo() {
-        const url = document.getElementById('url').value;
-        const status = document.getElementById('status');
-        const details = document.getElementById('video-details');
-        const select = document.getElementById('resolutions');
-
-        if (!url) return alert("Insira uma URL válida!");
-
-        status.innerText = "Buscando formatos disponíveis...";
-        details.style.display = "none";
-        select.innerHTML = "";
-
-        try {
-            const res = await fetch('/api/info', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url })
-            });
-
-            if (!res.ok) throw new Error("Erro ao obter dados do vídeo.");
-
-            const data = await res.json();
-            currentUrl = url;
-
-            document.getElementById('thumb').src = data.thumbnail;
-            document.getElementById('title').innerText = data.title;
-
-            data.resolutions.forEach(r => {
-                const opt = document.createElement('option');
-                opt.value = r;
-                opt.innerText = `${r}p (Vídeo + Áudio)`;
-                select.appendChild(opt);
-            });
-
-            const audioOpt = document.createElement('option');
-            audioOpt.value = "audio_only";
-            audioOpt.innerText = "Apenas Áudio (.mp3)";
-            select.appendChild(audioOpt);
-
-            status.innerText = "";
-            details.style.display = "block";
-        } catch (err) {
-            status.innerText = "Falha ao analisar o vídeo. Verifique a URL.";
-        }
-    }
-
-    async function baixarVideo() {
-        const status = document.getElementById('status');
-        const resolution = document.getElementById('resolutions').value;
-        const btnDownload = document.getElementById('btn-download');
-        const progBox = document.getElementById('prog-box');
-        const progBar = document.getElementById('prog-bar');
-
-        // Gera um ID único para acompanhar a tarefa de download
-        const taskId = 'task_' + Math.random().toString(36).substr(2, 9);
-
-        progBox.style.display = 'block';
-        progBar.style.width = '0%';
-        btnDownload.disabled = true;
-        status.innerText = "Iniciando download...";
-
-        // Abre a conexão SSE para escutar o progresso do servidor
-        const eventSource = new EventSource(`/api/progress/${taskId}`);
-        eventSource.onmessage = function(event) {
-            const [percent, state] = event.data.split('|');
-            progBar.style.width = percent + '%';
-
-            if (state === 'downloading') {
-                status.innerText = `Baixando do YouTube: ${percent}%`;
-            } else if (state === 'converting') {
-                status.innerText = "Mesclando áudio e vídeo com FFmpeg...";
-            } else if (state === 'finished' || state === 'error') {
-                eventSource.close();
+        btnPaste.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                inputUrl.value = text;
+            } catch (err) {
+                alert('Cole usando Ctrl + V.');
             }
-        };
+        });
 
-        try {
-            const res = await fetch('/api/download', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: currentUrl, resolution, task_id: taskId })
-            });
-
-            if (!res.ok) throw new Error("Erro durante o download.");
-
-            const blob = await res.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            const disposition = res.headers.get('content-disposition');
-            let filename = "download.mp4";
-            if (disposition && disposition.includes('filename=')) {
-                filename = disposition.split('filename=')[1].replace(/["']/g, '');
-            } else if (resolution === "audio_only") {
-                filename = "audio.mp3";
+        btnAnalyze.addEventListener('click', async () => {
+            const url = inputUrl.value.trim();
+            if (!url) {
+                showError("Por favor, insira o link de um vídeo.");
+                return;
             }
 
-            a.href = downloadUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+            statusMsg.style.display = 'none';
+            btnAnalyze.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Carregando...';
+            btnAnalyze.disabled = true;
 
-            status.innerText = "Download concluído com sucesso!";
-        } catch (err) {
-            status.innerText = "Erro ao processar o arquivo.";
-        } finally {
-            eventSource.close();
-            btnDownload.disabled = false;
+            try {
+                const res = await fetch('/api/info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Falha ao processar vídeo');
+
+                videoTitle.innerText = data.title;
+                
+                // Configura o player com o fluxo direto e pôster
+                if (data.direct_url) {
+                    videoPlayer.src = data.direct_url;
+                }
+                if (data.thumbnail) {
+                    videoPlayer.poster = data.thumbnail;
+                }
+
+                resSelect.innerHTML = '';
+                if (data.resolutions && data.resolutions.length > 0) {
+                    data.resolutions.forEach(r => {
+                        const opt = document.createElement('option');
+                        opt.value = r;
+                        opt.innerText = `Vídeo MP4 (${r}p)`;
+                        resSelect.appendChild(opt);
+                    });
+                } else {
+                    const opt = document.createElement('option');
+                    opt.value = 'best';
+                    opt.innerText = 'Melhor Qualidade (MP4)';
+                    resSelect.appendChild(opt);
+                }
+
+                const optAudio = document.createElement('option');
+                optAudio.value = 'audio_only';
+                optAudio.innerText = 'Apenas Áudio (MP3)';
+                resSelect.appendChild(optAudio);
+
+                videoCard.style.display = 'block';
+                progressBox.style.display = 'none';
+            } catch (e) {
+                showError("Falha ao carregar o vídeo. Verifique se o link está acessível.");
+            } finally {
+                btnAnalyze.innerHTML = '<i class="fa-solid fa-play"></i> Carregar Vídeo';
+                btnAnalyze.disabled = false;
+            }
+        });
+
+        btnStartDownload.addEventListener('click', async () => {
+            const url = inputUrl.value.trim();
+            const resolution = resSelect.value;
+            const taskId = crypto.randomUUID();
+
+            btnStartDownload.disabled = true;
+            progressBox.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.innerText = 'Processando... 0%';
+
+            const evtSource = new EventSource(`/api/progress/${taskId}`);
+            evtSource.onmessage = (e) => {
+                const [percent, status] = e.data.split('|');
+                progressFill.style.width = percent + '%';
+                if (status === 'downloading') {
+                    progressText.innerText = `Baixando para o servidor... ${percent}%`;
+                } else if (status === 'converting') {
+                    progressText.innerText = `Convertendo...`;
+                } else if (status === 'finished') {
+                    progressText.innerText = `Pronto para salvar!`;
+                    evtSource.close();
+                }
+            };
+
+            try {
+                const res = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, resolution, task_id: taskId })
+                });
+
+                if (!res.ok) throw new Error('Erro no download');
+
+                const blob = await res.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                
+                const disposition = res.headers.get('content-disposition');
+                let filename = 'video.mp4';
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    filename = decodeURIComponent(disposition.split('filename=')[1].replace(/"/g, ''));
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (err) {
+                showError('Erro ao gerar o arquivo de download.');
+            } finally {
+                btnStartDownload.disabled = false;
+                if (evtSource) evtSource.close();
+            }
+        });
+
+        function showError(msg) {
+            statusMsg.innerText = msg;
+            statusMsg.style.display = 'block';
         }
-    }
-</script>
+    </script>
 </body>
 </html>
