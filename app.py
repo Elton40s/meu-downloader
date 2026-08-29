@@ -3,6 +3,7 @@ import urllib.parse
 import urllib.request
 import asyncio
 import tempfile
+from urllib.parse import urlparse
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse, Response
 from pydantic import BaseModel
@@ -35,6 +36,7 @@ def get_video_info(data: InfoRequest):
         ydl_opts = dict(COMMON_YDL_OPTS)
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(data.url, download=False)
+            video_id = info.get("id")
             resolutions = set()
             
             formats = info.get("formats", [])
@@ -44,8 +46,26 @@ def get_video_info(data: InfoRequest):
                 if height and vcodec != "none":
                     resolutions.add(height)
             
-            direct_url = info.get("url")
-            if formats and not direct_url:
+            # Detecta reprodutor com áudio nativo por plataforma
+            embed_url = None
+            if "youtube.com" in data.url or "youtu.be" in data.url:
+                embed_url = f"https://www.youtube-nocookie.com/embed/{video_id}?autoplay=0"
+            elif "tokyvideo.com" in data.url:
+                parsed = urlparse(data.url)
+                path = parsed.path.replace("/br/video/", "/video/")
+                if path.startswith("/video/"):
+                    slug = path.replace("/video/", "")
+                    embed_url = f"https://www.tokyvideo.com/embed/{slug}"
+                else:
+                    embed_url = f"https://www.tokyvideo.com/embed/{video_id}"
+
+            # Busca stream com áudio e vídeo combinados caso precise de fallback
+            direct_url = None
+            for f in reversed(formats):
+                if f.get("vcodec") != "none" and f.get("acodec") != "none" and f.get("url"):
+                    direct_url = f.get("url")
+                    break
+            if not direct_url and formats:
                 direct_url = formats[-1].get("url")
 
             proxy_stream_url = f"/api/stream?url={urllib.parse.quote(direct_url)}" if direct_url else None
@@ -53,6 +73,7 @@ def get_video_info(data: InfoRequest):
             return {
                 "title": info.get("title"),
                 "thumbnail": info.get("thumbnail"),
+                "embed_url": embed_url,
                 "direct_url": proxy_stream_url or direct_url,
                 "resolutions": sorted(list(resolutions), reverse=True)
             }
@@ -65,8 +86,7 @@ def stream_video(url: str):
         req = urllib.request.Request(
             url,
             headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Referer": "https://www.tokyvideo.com/"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             }
         )
         response = urllib.request.urlopen(req, timeout=20)

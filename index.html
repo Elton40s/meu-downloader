@@ -342,11 +342,14 @@
             overflow: hidden;
             background: #000;
             margin-bottom: 15px;
+            position: relative;
+            min-height: 280px;
         }
 
-        video {
+        iframe, video {
             width: 100%;
-            max-height: 360px;
+            height: 320px;
+            border: none;
             display: block;
         }
 
@@ -574,12 +577,10 @@
         </div>
 
         <div class="header-controls">
-            <!-- Botão Modo Escuro -->
             <button class="icon-btn" id="btn-theme" title="Modo Claro/Escuro">
                 <i class="fa-solid fa-sun"></i>
             </button>
             
-            <!-- Botão Idioma -->
             <button class="icon-btn" id="btn-lang" title="Idioma">
                 <i class="fa-solid fa-globe"></i>
             </button>
@@ -589,7 +590,6 @@
                 <button class="lang-item" onclick="setLanguage('es')">🇪🇸 Español</button>
             </div>
 
-            <!-- Botão Menu Hambúrguer -->
             <button class="icon-btn menu-btn" id="btn-menu" title="Menu">
                 <i class="fa-solid fa-bars"></i>
             </button>
@@ -602,7 +602,6 @@
             <span class="bar">|</span> <span class="yet">YET</span><span class="load">Load</span>
         </div>
 
-        <!-- Input com Botão Limpar e Colar -->
         <div class="search-container">
             <input type="text" id="video-url" class="search-input" placeholder="Cole seu link de vídeo do YouTube">
             <button class="clear-btn" id="btn-clear" title="Limpar link"><i class="fa-solid fa-xmark"></i></button>
@@ -611,17 +610,15 @@
             </button>
         </div>
 
-        <!-- Botão Baixar Principal -->
         <button class="btn-main-action" id="btn-analyze">
             <i class="fa-solid fa-circle-arrow-down"></i> <span id="t-btn-analyze">Baixar</span>
         </button>
 
         <p id="status-msg"></p>
 
-        <!-- Preview Card com Player Integrado -->
         <div id="video-card">
-            <div class="player-wrapper">
-                <video id="video-player" controls playsinline></video>
+            <div class="player-wrapper" id="player-wrapper">
+                <!-- Injetado dinamicamente para garantir som 100% -->
             </div>
             <div id="video-title" class="video-title"></div>
             
@@ -640,13 +637,11 @@
             </div>
         </div>
 
-        <!-- Card de Informações Inferior -->
         <div class="info-card">
             <p id="t-info-1">- YETLoad é um baixador de vídeos do YouTube gratuito e baseado na web e não é afiliado a nenhum software ou produtos pagos.</p>
             <p id="t-info-2">- Agora oferecemos suporte à conversão de vídeos do YouTube para MP3 e M4A, incluindo faixas de áudio em vários idiomas. Experimente agora.</p>
         </div>
 
-        <!-- Banner Rodapé -->
         <div class="footer-banner">
             <div><i class="fa-solid fa-cloud"></i> <span id="t-footer-desc">Melhor Downloader do YouTube</span></div>
             <div><i class="fa-solid fa-star"></i></div>
@@ -669,7 +664,7 @@
         </div>
     </div>
 
-    <!-- Modal Informativo de Políticas / Sobre -->
+    <!-- Modal Informativo -->
     <div class="info-modal" id="info-modal">
         <div class="info-modal-box">
             <button class="info-modal-close" id="btn-info-close"><i class="fa-solid fa-xmark"></i></button>
@@ -679,7 +674,6 @@
     </div>
 
     <script>
-        // TRADUÇÕES MULTILÍNGUES
         const translations = {
             pt: {
                 heroTitle: "Baixador de Vídeos do YouTube",
@@ -721,7 +715,7 @@
                 saveFile: "Descargar Archivo",
                 info1: "- YETLoad es un descargador de videos gratuito basado en la web y no está afiliado a ningún software o producto de pago.",
                 info2: "- Ahora admitimos la conversión de videos de YouTube a MP3 e M4A, incluidas pistas de audio en varios idiomas. Pruébalo ahora.",
-                footerDesc: "El mejor descargador de YouTube",
+                footerDesc: "El melhor descargador de YouTube",
                 menuAbout: "Quiénes Somos",
                 menuTerms: "Políticas de Uso",
                 aboutTitle: "Quiénes Somos",
@@ -749,7 +743,6 @@
             document.getElementById('lang-dropdown').classList.remove('active');
         }
 
-        // TEMA ESCURO / CLARO
         const btnTheme = document.getElementById('btn-theme');
         btnTheme.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
@@ -757,7 +750,6 @@
             btnTheme.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
         });
 
-        // DROPDOWN DE IDIOMAS
         const btnLang = document.getElementById('btn-lang');
         const langDropdown = document.getElementById('lang-dropdown');
         btnLang.addEventListener('click', (e) => {
@@ -766,7 +758,6 @@
         });
         document.addEventListener('click', () => langDropdown.classList.remove('active'));
 
-        // BOTÃO LIMPAR INPUT
         const inputUrl = document.getElementById('video-url');
         const btnClear = document.getElementById('btn-clear');
         inputUrl.addEventListener('input', () => {
@@ -778,7 +769,6 @@
             inputUrl.focus();
         });
 
-        // BOTÃO COLAR
         const btnPaste = document.getElementById('btn-paste');
         btnPaste.addEventListener('click', async () => {
             try {
@@ -790,7 +780,6 @@
             }
         });
 
-        // MODAIS E MENU
         const btnMenu = document.getElementById('btn-menu');
         const menuModal = document.getElementById('menu-modal');
         const btnMenuClose = document.getElementById('btn-menu-close');
@@ -818,11 +807,10 @@
 
         btnInfoClose.addEventListener('click', () => infoModal.classList.remove('active'));
 
-        // LÓGICA DE ANÁLISE E DOWNLOAD
         const btnAnalyze = document.getElementById('btn-analyze');
         const statusMsg = document.getElementById('status-msg');
         const videoCard = document.getElementById('video-card');
-        const videoPlayer = document.getElementById('video-player');
+        const playerWrapper = document.getElementById('player-wrapper');
         const videoTitle = document.getElementById('video-title');
         const resSelect = document.getElementById('res-select');
         const btnStartDownload = document.getElementById('btn-start-download');
@@ -852,8 +840,23 @@
                 if (!res.ok) throw new Error(data.detail || 'Erro ao carregar o vídeo');
 
                 videoTitle.innerText = data.title;
-                if (data.direct_url) videoPlayer.src = data.direct_url;
-                if (data.thumbnail) videoPlayer.poster = data.thumbnail;
+                playerWrapper.innerHTML = '';
+
+                // Se houver embed disponível (YouTube / Tokyvideo), reproduz com som total
+                if (data.embed_url) {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = data.embed_url;
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                    iframe.allowFullscreen = true;
+                    playerWrapper.appendChild(iframe);
+                } else if (data.direct_url) {
+                    const video = document.createElement('video');
+                    video.src = data.direct_url;
+                    video.controls = true;
+                    video.playsInline = true;
+                    if (data.thumbnail) video.poster = data.thumbnail;
+                    playerWrapper.appendChild(video);
+                }
 
                 resSelect.innerHTML = '';
                 if (data.resolutions && data.resolutions.length > 0) {
