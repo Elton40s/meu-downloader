@@ -4,7 +4,7 @@ import urllib.request
 import asyncio
 import tempfile
 from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse, Response
 from pydantic import BaseModel
 import yt_dlp
 
@@ -48,7 +48,6 @@ def get_video_info(data: InfoRequest):
             if formats and not direct_url:
                 direct_url = formats[-1].get("url")
 
-            # Rota interna de proxy para o player
             proxy_stream_url = f"/api/stream?url={urllib.parse.quote(direct_url)}" if direct_url else None
 
             return {
@@ -167,4 +166,9 @@ def serve_home():
 
 @app.get("/logo.png")
 def get_logo():
-    return FileResponse("logo.png", media_type="image/png")
+    if os.path.exists("logo.png"):
+        return FileResponse("logo.png", media_type="image/png")
+    for f in os.listdir("."):
+        if f.lower().startswith("logo"):
+            return FileResponse(f, media_type="image/png")
+    return Response(status_code=404)
