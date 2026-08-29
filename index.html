@@ -3,176 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YTDown - Player & Downloader</title>
+    <title>YETLoad - Baixador de Vídeos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #0d0e11;
-            --card-bg: #16181d;
-            --input-bg: #1c1f26;
-            --border-color: #2b2f3a;
-            --text-main: #ffffff;
-            --text-muted: #8e95a5;
-            --btn-red: #ff4757;
-            --btn-paste-bg: #ffd1d6;
-            --btn-paste-text: #e84118;
-            --btn-download-bg: #232730;
-            --btn-download-border: #353b48;
+            --bg-page: #5bc4cf;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --bg-card-info: rgba(0, 0, 0, 0.25);
+            --text-title: #ffffff;
+            --text-dark: #2c3e50;
+            --text-info: #ffffff;
+            --header-border: rgba(255, 255, 255, 0.3);
+            --header-btn-bg: rgba(255, 255, 255, 0.25);
+            --header-btn-color: #ffffff;
+            --menu-bg: #1f2937;
+            --btn-paste-bg: #8b1820;
+            --btn-paste-hover: #701118;
+            --btn-download-bg: #6ee76e;
+            --btn-download-text: #ffffff;
+            --input-bg: #ffffff;
+            --input-text: #333333;
+            --logo-yet: #113f67;
+            --logo-load: #ffffff;
+        }
+
+        body.dark-mode {
+            --bg-page: #0f1115;
+            --bg-card: #1a1d24;
+            --bg-card-info: #14171d;
+            --text-title: #f1f2f6;
+            --text-dark: #f1f2f6;
+            --text-info: #a4b0be;
+            --header-border: #2f3542;
+            --header-btn-bg: #222730;
+            --header-btn-color: #70a1ff;
+            --menu-bg: #14171d;
+            --btn-paste-bg: #901c24;
+            --btn-paste-hover: #b72530;
+            --btn-download-bg: #2ed573;
+            --btn-download-text: #0f1115;
+            --input-bg: #222730;
+            --input-text: #ffffff;
+            --logo-yet: #70a1ff;
+            --logo-load: #f1f2f6;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            background-color: var(--bg-page);
+            color: var(--text-dark);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
         }
 
+        /* HEADER */
         header {
+            width: 100%;
+            max-width: 650px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 24px;
-            background-color: var(--bg-color);
-            border-bottom: 1px solid #1a1d24;
+            padding: 16px 20px;
         }
 
-        .logo {
+        .logo-wrapper {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.4rem;
-            font-weight: 700;
+            gap: 12px;
+            text-decoration: none;
+            cursor: pointer;
         }
 
-        .logo-icon {
-            width: 38px;
-            height: 38px;
+        .logo-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
             background: #ffffff;
-            color: #000;
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
-        .container {
-            max-width: 720px;
+        .logo-img img {
             width: 100%;
-            margin: 0 auto;
-            padding: 30px 20px;
-            text-align: center;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.6);
+            display: block;
         }
 
-        h1 {
-            font-size: 2.1rem;
-            font-weight: 700;
-            margin-bottom: 8px;
+        .logo-text {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            margin-bottom: 30px;
+        .logo-text .part-yet {
+            color: var(--logo-yet);
         }
 
-        .search-box-wrapper {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 8px;
+        .logo-text .part-load {
+            color: var(--logo-load);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 8px;
+            position: relative;
+        }
+
+        .icon-btn {
+            background: var(--header-btn-bg);
+            border: 1px solid var(--header-border);
+            color: var(--header-btn-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .icon-btn.menu-btn {
+            background: #113f67;
+            color: #fff;
+            border: none;
+        }
+
+        /* DROPDOWN IDIOMA */
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: 48px;
+            right: 48px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            z-index: 100;
+            overflow: hidden;
+            flex-direction: column;
+            min-width: 140px;
+        }
+
+        body.dark-mode .lang-dropdown {
+            background: #222730;
+        }
+
+        .lang-dropdown.active {
+            display: flex;
+        }
+
+        .lang-item {
+            padding: 10px 15px;
             display: flex;
             align-items: center;
             gap: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+            border: none;
+            background: transparent;
+            text-align: left;
+            width: 100%;
+        }
+
+        body.dark-mode .lang-item {
+            color: #fff;
+        }
+
+        .lang-item:hover {
+            background: rgba(0,0,0,0.06);
+        }
+
+        body.dark-mode .lang-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* MAIN CONTENT */
+        .main-container {
+            width: 100%;
+            max-width: 650px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero-title {
+            color: var(--text-title);
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .hero-brand {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .hero-brand .bar {
+            color: #ffffff;
+            font-weight: 300;
+            margin-right: 2px;
+        }
+
+        .hero-brand .yet {
+            color: #113f67;
+        }
+
+        body.dark-mode .hero-brand .yet {
+            color: #70a1ff;
+        }
+
+        .hero-brand .load {
+            color: #ffffff;
+        }
+
+        /* SEARCH BOX */
+        .search-container {
+            width: 100%;
+            background: var(--input-bg);
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            position: relative;
         }
 
         .search-input {
             flex: 1;
-            background: transparent;
             border: none;
             outline: none;
-            color: #fff;
-            font-size: 1rem;
-            padding: 10px 14px;
+            background: transparent;
+            padding: 10px;
+            font-size: 1.05rem;
+            color: var(--input-text);
         }
 
-        .paste-btn {
-            background-color: var(--btn-paste-bg);
-            color: var(--btn-paste-text);
+        .clear-btn {
+            background: transparent;
             border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
+            color: #999;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 6px 10px;
+            display: none;
+        }
+
+        .btn-paste {
+            background: var(--btn-paste-bg);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 18px;
             font-weight: 600;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
         }
 
-        .action-btn {
-            width: 100%;
-            background-color: var(--btn-download-bg);
-            color: #fff;
-            border: 1px solid var(--btn-download-border);
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            display: inline-flex;
+        .btn-paste:hover {
+            background: var(--btn-paste-hover);
+        }
+
+        /* MAIN ACTION BUTTON */
+        .btn-main-action {
+            background: var(--btn-download-bg);
+            color: var(--btn-download-text);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 36px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             margin-bottom: 30px;
         }
 
+        .btn-main-action i {
+            font-size: 1.3rem;
+        }
+
+        /* STATUS / ERROR */
         #status-msg {
-            color: #ff5252;
-            margin-bottom: 15px;
-            font-size: 0.95rem;
+            color: #d63031;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 600;
             display: none;
         }
 
+        /* VIDEO PREVIEW CARD */
         #video-card {
             display: none;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            width: 100%;
+            background: var(--bg-card);
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
             text-align: left;
         }
 
-        .player-container {
+        .player-wrapper {
             width: 100%;
             border-radius: 8px;
             overflow: hidden;
             background: #000;
             margin-bottom: 15px;
-            min-height: 380px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         video {
             width: 100%;
-            max-height: 420px;
+            max-height: 360px;
             display: block;
         }
 
         .video-title {
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--text-dark);
             margin-bottom: 15px;
             line-height: 1.4;
         }
@@ -187,84 +368,268 @@
             flex: 1;
             padding: 12px;
             background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: #fff;
-            border-radius: 8px;
+            border: 1px solid #ccc;
+            color: var(--input-text);
+            border-radius: 6px;
             outline: none;
             font-size: 1rem;
         }
 
-        .confirm-btn {
-            background: #00d2d3;
-            color: #000;
+        .btn-download-file {
+            background: #113f67;
+            color: #fff;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 12px 20px;
+            border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
         }
 
+        /* PROGRESS BAR */
         .progress-box {
             display: none;
             margin-top: 15px;
         }
 
         .progress-bar-bg {
-            background: #2b2f3a;
-            border-radius: 20px;
+            background: #dfe6e9;
+            border-radius: 10px;
             height: 10px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: #ff4757;
+            background: #2ed573;
             width: 0%;
             transition: width 0.3s;
         }
 
         .progress-text {
             font-size: 0.85rem;
-            color: var(--text-muted);
+            color: #747d8c;
             margin-top: 6px;
             text-align: center;
+        }
+
+        /* INFO CARD INFERIOR */
+        .info-card {
+            width: 100%;
+            background: var(--bg-card-info);
+            backdrop-filter: blur(4px);
+            border-radius: 4px;
+            padding: 16px 20px;
+            text-align: left;
+            color: var(--text-info);
+            font-size: 0.92rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .info-card p {
+            margin-bottom: 10px;
+        }
+
+        .info-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* FOOTER BRANDING */
+        .footer-banner {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 600;
+            padding: 10px 0;
+        }
+
+        /* MODAL / MENU LATERAL */
+        .menu-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: flex-end;
+        }
+
+        .menu-modal.active {
+            display: flex;
+        }
+
+        .menu-content {
+            width: 280px;
+            height: 100%;
+            background: var(--menu-bg);
+            color: #fff;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .menu-close {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .menu-link {
+            padding: 12px 10px;
+            color: #f1f2f6;
+            text-decoration: none;
+            font-size: 1.05rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .menu-link:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* POPUP TEXT MODAL */
+        .info-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .info-modal.active {
+            display: flex;
+        }
+
+        .info-modal-box {
+            background: #ffffff;
+            color: #333;
+            max-width: 500px;
+            width: 100%;
+            border-radius: 12px;
+            padding: 25px;
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        body.dark-mode .info-modal-box {
+            background: #1a1d24;
+            color: #f1f2f6;
+        }
+
+        .info-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: inherit;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">
-            <div class="logo-icon"><i class="fa-solid fa-download"></i></div>
-            <span>YTDown</span>
+        <div class="logo-wrapper" onclick="location.reload()">
+            <div class="logo-img">
+                <img src="/logo.png" alt="Logo">
+            </div>
+            <div class="logo-text">
+                <span class="part-yet">YET</span><span class="part-load">Load</span>
+            </div>
+        </div>
+
+        <div class="header-controls">
+            <!-- Botão Modo Escuro -->
+            <button class="icon-btn" id="btn-theme" title="Modo Claro/Escuro">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+            
+            <!-- Botão Idioma -->
+            <button class="icon-btn" id="btn-lang" title="Idioma">
+                <i class="fa-solid fa-globe"></i>
+            </button>
+            <div class="lang-dropdown" id="lang-dropdown">
+                <button class="lang-item" onclick="setLanguage('pt')">🇧🇷 Português</button>
+                <button class="lang-item" onclick="setLanguage('en')">🇺🇸 English</button>
+                <button class="lang-item" onclick="setLanguage('es')">🇪🇸 Español</button>
+            </div>
+
+            <!-- Botão Menu Hambúrguer -->
+            <button class="icon-btn menu-btn" id="btn-menu" title="Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
     </header>
 
-    <div class="container">
-        <h1>Baixador & Player Online</h1>
-        <p class="subtitle">Cole o link do vídeo, assista na página e baixe sem anúncios.</p>
-
-        <div class="search-box-wrapper">
-            <input type="text" id="video-url" class="search-input" placeholder="Cole o link do vídeo aqui...">
-            <button class="paste-btn" id="btn-paste"><i class="fa-solid fa-clipboard"></i> Colar</button>
+    <div class="main-container">
+        <h2 class="hero-title" id="t-hero-title">Baixador de Vídeos do YouTube</h2>
+        <div class="hero-brand">
+            <span class="bar">|</span> <span class="yet">YET</span><span class="load">Load</span>
         </div>
 
-        <button class="action-btn" id="btn-analyze">
-            <i class="fa-solid fa-play"></i> Carregar Vídeo
+        <!-- Input com Botão Limpar e Colar -->
+        <div class="search-container">
+            <input type="text" id="video-url" class="search-input" placeholder="Cole seu link de vídeo do YouTube">
+            <button class="clear-btn" id="btn-clear" title="Limpar link"><i class="fa-solid fa-xmark"></i></button>
+            <button class="btn-paste" id="btn-paste">
+                <i class="fa-solid fa-clipboard"></i> <span id="t-btn-paste">Colar</span>
+            </button>
+        </div>
+
+        <!-- Botão Baixar Principal -->
+        <button class="btn-main-action" id="btn-analyze">
+            <i class="fa-solid fa-circle-arrow-down"></i> <span id="t-btn-analyze">Baixar</span>
         </button>
 
         <p id="status-msg"></p>
 
+        <!-- Preview Card com Player Integrado -->
         <div id="video-card">
-            <div class="player-container">
-                <video id="video-player" controls playsinline preload="auto"></video>
+            <div class="player-wrapper">
+                <video id="video-player" controls playsinline></video>
             </div>
-            
             <div id="video-title" class="video-title"></div>
-
+            
             <div class="format-selection">
                 <select id="res-select"></select>
-                <button class="confirm-btn" id="btn-start-download">Baixar Arquivo</button>
+                <button class="btn-download-file" id="btn-start-download">
+                    <span id="t-btn-save">Baixar Arquivo</span>
+                </button>
             </div>
 
             <div class="progress-box" id="progress-box">
@@ -274,11 +639,186 @@
                 <div class="progress-text" id="progress-text">Iniciando... 0%</div>
             </div>
         </div>
+
+        <!-- Card de Informações Inferior -->
+        <div class="info-card">
+            <p id="t-info-1">- YETLoad é um baixador de vídeos do YouTube gratuito e baseado na web e não é afiliado a nenhum software ou produtos pagos.</p>
+            <p id="t-info-2">- Agora oferecemos suporte à conversão de vídeos do YouTube para MP3 e M4A, incluindo faixas de áudio em vários idiomas. Experimente agora.</p>
+        </div>
+
+        <!-- Banner Rodapé -->
+        <div class="footer-banner">
+            <div><i class="fa-solid fa-cloud"></i> <span id="t-footer-desc">Melhor Downloader do YouTube</span></div>
+            <div><i class="fa-solid fa-star"></i></div>
+        </div>
+    </div>
+
+    <!-- Menu Lateral -->
+    <div class="menu-modal" id="menu-modal">
+        <div class="menu-content">
+            <div class="menu-header">
+                <h3>YETLoad</h3>
+                <button class="menu-close" id="btn-menu-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="menu-link" id="link-about">
+                <i class="fa-solid fa-users"></i> <span id="t-menu-about">Quem Somos</span>
+            </div>
+            <div class="menu-link" id="link-terms">
+                <i class="fa-solid fa-shield-halved"></i> <span id="t-menu-terms">Políticas de Uso</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Informativo de Políticas / Sobre -->
+    <div class="info-modal" id="info-modal">
+        <div class="info-modal-box">
+            <button class="info-modal-close" id="btn-info-close"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-title" style="margin-bottom: 15px;">Título</h3>
+            <div id="modal-body" style="font-size: 0.95rem; line-height: 1.6;">Conteúdo</div>
+        </div>
     </div>
 
     <script>
+        // TRADUÇÕES MULTILÍNGUES
+        const translations = {
+            pt: {
+                heroTitle: "Baixador de Vídeos do YouTube",
+                placeholder: "Cole seu link de vídeo do YouTube",
+                paste: "Colar",
+                analyze: "Baixar",
+                saveFile: "Baixar Arquivo",
+                info1: "- YETLoad é um baixador de vídeos do YouTube gratuito e baseado na web e não é afiliado a nenhum software ou produtos pagos.",
+                info2: "- Agora oferecemos suporte à conversão de vídeos do YouTube para MP3 e M4A, incluindo faixas de áudio em vários idiomas. Experimente agora.",
+                footerDesc: "Melhor Downloader do YouTube",
+                menuAbout: "Quem Somos",
+                menuTerms: "Políticas de Uso",
+                aboutTitle: "Quem Somos",
+                aboutText: "O YETLoad é uma ferramenta online de alta performance criada para simplificar o download e a reprodução de mídias da web de forma rápida, sem anúncios invasivos e 100% gratuita.",
+                termsTitle: "Políticas de Uso",
+                termsText: "O YETLoad destina-se exclusivamente para uso pessoal de conteúdos com direitos autorais livres ou autorizados pelo criador original. Não armazenamos vídeos em nossos servidores."
+            },
+            en: {
+                heroTitle: "YouTube Video Downloader",
+                placeholder: "Paste your YouTube video link here",
+                paste: "Paste",
+                analyze: "Download",
+                saveFile: "Download File",
+                info1: "- YETLoad is a free web-based video downloader and is not affiliated with any paid software or products.",
+                info2: "- We now support converting YouTube videos to MP3 and M4A, including multi-language audio tracks. Try it now.",
+                footerDesc: "Best YouTube Downloader",
+                menuAbout: "About Us",
+                menuTerms: "Terms of Use",
+                aboutTitle: "About Us",
+                aboutText: "YETLoad is a high-performance online tool created to simplify media downloading and playback cleanly, without invasive ads and 100% free.",
+                termsTitle: "Terms of Use",
+                termsText: "YETLoad is strictly intended for personal use of free-to-use or creator-authorized media content. We do not store videos on our servers."
+            },
+            es: {
+                heroTitle: "Descargador de Videos de YouTube",
+                placeholder: "Pega el enlace del video de YouTube aquí",
+                paste: "Pegar",
+                analyze: "Descargar",
+                saveFile: "Descargar Archivo",
+                info1: "- YETLoad es un descargador de videos gratuito basado en la web y no está afiliado a ningún software o producto de pago.",
+                info2: "- Ahora admitimos la conversión de videos de YouTube a MP3 e M4A, incluidas pistas de audio en varios idiomas. Pruébalo ahora.",
+                footerDesc: "El mejor descargador de YouTube",
+                menuAbout: "Quiénes Somos",
+                menuTerms: "Políticas de Uso",
+                aboutTitle: "Quiénes Somos",
+                aboutText: "YETLoad es una herramienta online de alto rendimiento creada para simplificar la descarga y reproducción de medios de forma rápida, sin publicidad invasiva y 100% gratuita.",
+                termsTitle: "Políticas de Uso",
+                termsText: "YETLoad está destinado estrictamente para uso personal de contenidos con derechos libres o autorizados por su creador. No almacenamos videos en nuestros servidores."
+            }
+        };
+
+        let currentLang = 'pt';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            document.getElementById('t-hero-title').innerText = t.heroTitle;
+            document.getElementById('video-url').placeholder = t.placeholder;
+            document.getElementById('t-btn-paste').innerText = t.paste;
+            document.getElementById('t-btn-analyze').innerText = t.analyze;
+            document.getElementById('t-btn-save').innerText = t.saveFile;
+            document.getElementById('t-info-1').innerText = t.info1;
+            document.getElementById('t-info-2').innerText = t.info2;
+            document.getElementById('t-footer-desc').innerText = t.footerDesc;
+            document.getElementById('t-menu-about').innerText = t.menuAbout;
+            document.getElementById('t-menu-terms').innerText = t.menuTerms;
+            document.getElementById('lang-dropdown').classList.remove('active');
+        }
+
+        // TEMA ESCURO / CLARO
+        const btnTheme = document.getElementById('btn-theme');
+        btnTheme.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            btnTheme.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        });
+
+        // DROPDOWN DE IDIOMAS
+        const btnLang = document.getElementById('btn-lang');
+        const langDropdown = document.getElementById('lang-dropdown');
+        btnLang.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', () => langDropdown.classList.remove('active'));
+
+        // BOTÃO LIMPAR INPUT
         const inputUrl = document.getElementById('video-url');
+        const btnClear = document.getElementById('btn-clear');
+        inputUrl.addEventListener('input', () => {
+            btnClear.style.display = inputUrl.value ? 'block' : 'none';
+        });
+        btnClear.addEventListener('click', () => {
+            inputUrl.value = '';
+            btnClear.style.display = 'none';
+            inputUrl.focus();
+        });
+
+        // BOTÃO COLAR
         const btnPaste = document.getElementById('btn-paste');
+        btnPaste.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                inputUrl.value = text;
+                btnClear.style.display = 'block';
+            } catch (err) {
+                alert('Pressione Ctrl + V para colar.');
+            }
+        });
+
+        // MODAIS E MENU
+        const btnMenu = document.getElementById('btn-menu');
+        const menuModal = document.getElementById('menu-modal');
+        const btnMenuClose = document.getElementById('btn-menu-close');
+        const infoModal = document.getElementById('info-modal');
+        const btnInfoClose = document.getElementById('btn-info-close');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        btnMenu.addEventListener('click', () => menuModal.classList.add('active'));
+        btnMenuClose.addEventListener('click', () => menuModal.classList.remove('active'));
+
+        document.getElementById('link-about').addEventListener('click', () => {
+            menuModal.classList.remove('active');
+            modalTitle.innerText = translations[currentLang].aboutTitle;
+            modalBody.innerText = translations[currentLang].aboutText;
+            infoModal.classList.add('active');
+        });
+
+        document.getElementById('link-terms').addEventListener('click', () => {
+            menuModal.classList.remove('active');
+            modalTitle.innerText = translations[currentLang].termsTitle;
+            modalBody.innerText = translations[currentLang].termsText;
+            infoModal.classList.add('active');
+        });
+
+        btnInfoClose.addEventListener('click', () => infoModal.classList.remove('active'));
+
+        // LÓGICA DE ANÁLISE E DOWNLOAD
         const btnAnalyze = document.getElementById('btn-analyze');
         const statusMsg = document.getElementById('status-msg');
         const videoCard = document.getElementById('video-card');
@@ -290,24 +830,15 @@
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.getElementById('progress-text');
 
-        btnPaste.addEventListener('click', async () => {
-            try {
-                const text = await navigator.clipboard.readText();
-                inputUrl.value = text;
-            } catch (err) {
-                alert('Cole usando Ctrl + V.');
-            }
-        });
-
         btnAnalyze.addEventListener('click', async () => {
             const url = inputUrl.value.trim();
             if (!url) {
-                showError("Por favor, insira o link de um vídeo.");
+                showError("Por favor, cole um link de vídeo válido.");
                 return;
             }
 
             statusMsg.style.display = 'none';
-            btnAnalyze.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Carregando...';
+            btnAnalyze.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
             btnAnalyze.disabled = true;
 
             try {
@@ -318,16 +849,11 @@
                 });
 
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || 'Falha ao processar vídeo');
+                if (!res.ok) throw new Error(data.detail || 'Erro ao carregar o vídeo');
 
                 videoTitle.innerText = data.title;
-                
-                if (data.direct_url) {
-                    videoPlayer.src = data.direct_url;
-                }
-                if (data.thumbnail) {
-                    videoPlayer.poster = data.thumbnail;
-                }
+                if (data.direct_url) videoPlayer.src = data.direct_url;
+                if (data.thumbnail) videoPlayer.poster = data.thumbnail;
 
                 resSelect.innerHTML = '';
                 if (data.resolutions && data.resolutions.length > 0) {
@@ -352,9 +878,9 @@
                 videoCard.style.display = 'block';
                 progressBox.style.display = 'none';
             } catch (e) {
-                showError("Falha ao carregar o vídeo. Verifique se o link está acessível.");
+                showError("Falha ao analisar o link. Verifique a URL ou tente novamente.");
             } finally {
-                btnAnalyze.innerHTML = '<i class="fa-solid fa-play"></i> Carregar Vídeo';
+                btnAnalyze.innerHTML = '<i class="fa-solid fa-circle-arrow-down"></i> <span id="t-btn-analyze">' + translations[currentLang].analyze + '</span>';
                 btnAnalyze.disabled = false;
             }
         });
@@ -374,11 +900,11 @@
                 const [percent, status] = e.data.split('|');
                 progressFill.style.width = percent + '%';
                 if (status === 'downloading') {
-                    progressText.innerText = `Baixando para o servidor... ${percent}%`;
+                    progressText.innerText = `Baixando... ${percent}%`;
                 } else if (status === 'converting') {
-                    progressText.innerText = `Convertendo...`;
+                    progressText.innerText = `Convertendo formato...`;
                 } else if (status === 'finished') {
-                    progressText.innerText = `Pronto para salvar!`;
+                    progressText.innerText = `Download concluído!`;
                     evtSource.close();
                 }
             };
@@ -408,7 +934,7 @@
                 a.click();
                 a.remove();
             } catch (err) {
-                showError('Erro ao gerar o arquivo de download.');
+                showError('Erro ao gerar o arquivo para download.');
             } finally {
                 btnStartDownload.disabled = false;
                 if (evtSource) evtSource.close();

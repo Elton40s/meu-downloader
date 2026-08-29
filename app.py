@@ -164,3 +164,7 @@ def download_video(data: DownloadRequest, background_tasks: BackgroundTasks):
 def serve_home():
     with open("index.html", "r", encoding="utf-8") as f:
         return f.read()
+
+@app.get("/logo.png")
+def get_logo():
+    return FileResponse("logo.png", media_type="image/png")
