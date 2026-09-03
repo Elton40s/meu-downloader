@@ -1,953 +1,814 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark-mode">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YETLoad - Baixador de Vídeos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-page: #5bc4cf;
-            --bg-card: rgba(255, 255, 255, 0.95);
-            --bg-card-info: rgba(0, 0, 0, 0.25);
-            --text-title: #ffffff;
-            --text-dark: #2c3e50;
-            --text-info: #ffffff;
-            --header-border: rgba(255, 255, 255, 0.3);
-            --header-btn-bg: rgba(255, 255, 255, 0.25);
-            --header-btn-color: #ffffff;
-            --menu-bg: #1f2937;
-            --btn-paste-bg: #8b1820;
-            --btn-paste-hover: #701118;
-            --btn-download-bg: #6ee76e;
-            --btn-download-text: #ffffff;
-            --input-bg: #ffffff;
-            --input-text: #333333;
-            --logo-yet: #113f67;
-            --logo-load: #ffffff;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Baixador de Vídeos do YouTube | YET Load</title>
+  
+  <!-- Ícone da aba do navegador -->
+  <link rel="icon" type="image/png" href="logo.png" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* PADRÃO: TEMA ESCURO */
+    :root {
+      --bg-color: #0b1120;
+      --card-bg: #1e293b;
+      --text-main: #f1f5f9;
+      --text-brand: #38bdf8;
+      --input-bg: #0f172a;
+      --input-text: #ffffff;
+      --btn-green: #10b981;
+      --btn-paste: #991b1b;
+      --btn-header: #334155;
+      --btn-menu: #0284c7;
+      --drawer-bg: #0f172a;
+      --drawer-text: #ffffff;
+    }
 
-        body.dark-mode {
-            --bg-page: #0f1115;
-            --bg-card: #1a1d24;
-            --bg-card-info: #14171d;
-            --text-title: #f1f2f6;
-            --text-dark: #f1f2f6;
-            --text-info: #a4b0be;
-            --header-border: #2f3542;
-            --header-btn-bg: #222730;
-            --header-btn-color: #70a1ff;
-            --menu-bg: #14171d;
-            --btn-paste-bg: #901c24;
-            --btn-paste-hover: #b72530;
-            --btn-download-bg: #2ed573;
-            --btn-download-text: #0f1115;
-            --input-bg: #222730;
-            --input-text: #ffffff;
-            --logo-yet: #70a1ff;
-            --logo-load: #f1f2f6;
-        }
+    /* TEMA CLARO */
+    html.light-mode {
+      --bg-color: #4ebed2;
+      --card-bg: #3fa5b8;
+      --text-main: #ffffff;
+      --text-brand: #174b5f;
+      --input-bg: #ffffff;
+      --input-text: #1e293b;
+      --btn-green: #73db68;
+      --btn-paste: #8b1828;
+      --btn-header: rgba(255, 255, 255, 0.35);
+      --btn-menu: #174b5f;
+      --drawer-bg: #1e293b;
+      --drawer-text: #f8fafc;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            transition: background-color 0.25s ease, color 0.25s ease;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
 
-        body {
-            background-color: var(--bg-page);
-            color: var(--text-dark);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 16px 36px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
 
-        /* HEADER */
-        header {
-            width: 100%;
-            max-width: 650px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-        }
+    .app-container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        .logo-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            cursor: pointer;
-        }
+    /* Header Bar */
+    .header-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    /* Imagem da Logo PNG */
+    .brand-img-logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      display: block;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
 
-        .logo-img {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: 2px solid #ffffff;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
+    .brand-name {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-brand);
+      letter-spacing: -0.5px;
+    }
+    .brand-name span {
+      color: #ffffff;
+    }
+    .actions-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .top-btn {
+      background: var(--btn-header);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .top-btn.btn-menu {
+      background: var(--btn-menu);
+    }
 
-        .logo-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scale(1.6);
-            display: block;
-        }
+    /* Page Headline */
+    .hero-title-section {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .hero-subtitle {
+      font-size: 21px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
+    }
+    .hero-main-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: -0.5px;
+    }
+    .hero-main-title .sep {
+      color: #ffffff;
+      font-weight: 300;
+    }
+    .hero-main-title .highlight {
+      color: #ffffff;
+    }
 
-        .logo-text {
-            font-size: 1.85rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
+    /* Input Box */
+    .input-wrapper {
+      width: 100%;
+      background: var(--input-bg);
+      border-radius: 12px;
+      padding: 6px 8px 6px 14px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .input-wrapper input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: var(--input-text);
+      background: transparent;
+      min-width: 0;
+      font-weight: 500;
+    }
+    .btn-clear {
+      display: none;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 0 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-clear svg {
+      width: 18px;
+      height: 18px;
+    }
+    .btn-paste {
+      background: var(--btn-paste);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
-        .logo-text .part-yet {
-            color: var(--logo-yet);
-        }
+    /* Download Primary Button */
+    .btn-submit-download {
+      background: var(--btn-green);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 28px;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      margin-bottom: 24px;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .btn-submit-download:active {
+      transform: scale(0.98);
+    }
+    .btn-submit-download:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
-        .logo-text .part-load {
-            color: var(--logo-load);
-        }
+    /* Video Result Box */
+    #result-box {
+      display: none;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    .video-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: center;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .player-container {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      background: #000000;
+    }
+    .player-container iframe,
+    .player-container video {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--input-bg);
+      border: none;
+      color: var(--text-brand);
+      font-size: 14px;
+      font-weight: 700;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .btn-save-video {
+      width: 100%;
+      background: var(--text-brand);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .progress-bar-container {
+      display: none;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      overflow: hidden;
+      height: 9px;
+      margin-top: 12px;
+    }
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--btn-green);
+      transition: width 0.3s;
+    }
+    .status-text {
+      font-size: 12px;
+      color: var(--text-main);
+      text-align: center;
+      margin-top: 6px;
+      font-weight: 600;
+    }
 
-        .header-controls {
-            display: flex;
-            gap: 8px;
-            position: relative;
-        }
+    /* Description Box */
+    .description-card {
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 18px 16px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: var(--text-main);
+      margin-bottom: 28px;
+    }
+    .description-card p {
+      margin-bottom: 12px;
+    }
+    .description-card p:last-child {
+      margin-bottom: 0;
+    }
 
-        .icon-btn {
-            background: var(--header-btn-bg);
-            border: 1px solid var(--header-border);
-            color: var(--header-btn-color);
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            cursor: pointer;
-        }
+    /* Footer */
+    .footer-highlight {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      padding: 0 4px;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .icon-btn.menu-btn {
-            background: #113f67;
-            color: #fff;
-            border: none;
-        }
+    /* Modais e Drawer */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      z-index: 99;
+    }
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 280px;
+      height: 100vh;
+      background: var(--drawer-bg);
+      color: var(--drawer-text);
+      z-index: 100;
+      transition: right 0.3s ease;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+    }
+    .drawer.active {
+      right: 0;
+    }
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 12px;
+    }
+    .drawer-header h3 {
+      font-size: 18px;
+      color: var(--text-brand);
+    }
+    .drawer-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .drawer-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--drawer-text);
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(255,255,255,0.05);
+    }
+    .drawer-item:hover {
+      background: rgba(255,255,255,0.1);
+    }
 
-        /* DROPDOWN IDIOMA */
-        .lang-dropdown {
-            display: none;
-            position: absolute;
-            top: 48px;
-            right: 48px;
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-            z-index: 100;
-            overflow: hidden;
-            flex-direction: column;
-            min-width: 140px;
-        }
-
-        body.dark-mode .lang-dropdown {
-            background: #222730;
-        }
-
-        .lang-dropdown.active {
-            display: flex;
-        }
-
-        .lang-item {
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #333;
-            border: none;
-            background: transparent;
-            text-align: left;
-            width: 100%;
-        }
-
-        body.dark-mode .lang-item {
-            color: #fff;
-        }
-
-        .lang-item:hover {
-            background: rgba(0,0,0,0.06);
-        }
-
-        body.dark-mode .lang-item:hover {
-            background: rgba(255,255,255,0.08);
-        }
-
-        /* MAIN CONTENT */
-        .main-container {
-            width: 100%;
-            max-width: 650px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .hero-title {
-            color: var(--text-title);
-            font-size: 1.5rem;
-            font-weight: 400;
-            margin-bottom: 4px;
-        }
-
-        .hero-brand {
-            font-size: 2.2rem;
-            font-weight: 900;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-
-        .hero-brand .bar {
-            color: #ffffff;
-            font-weight: 300;
-            margin-right: 2px;
-        }
-
-        .hero-brand .yet {
-            color: #113f67;
-        }
-
-        body.dark-mode .hero-brand .yet {
-            color: #70a1ff;
-        }
-
-        .hero-brand .load {
-            color: #ffffff;
-        }
-
-        /* SEARCH BOX */
-        .search-container {
-            width: 100%;
-            background: var(--input-bg);
-            border-radius: 8px;
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .search-input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            padding: 10px;
-            font-size: 1.05rem;
-            color: var(--input-text);
-        }
-
-        .clear-btn {
-            background: transparent;
-            border: none;
-            color: #999;
-            font-size: 1.1rem;
-            cursor: pointer;
-            padding: 6px 10px;
-            display: none;
-        }
-
-        .btn-paste {
-            background: var(--btn-paste-bg);
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            padding: 10px 18px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-        }
-
-        .btn-paste:hover {
-            background: var(--btn-paste-hover);
-        }
-
-        /* MAIN ACTION BUTTON */
-        .btn-main-action {
-            background: var(--btn-download-bg);
-            color: var(--btn-download-text);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 36px;
-            font-size: 1.25rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            margin-bottom: 30px;
-        }
-
-        .btn-main-action i {
-            font-size: 1.3rem;
-        }
-
-        /* STATUS / ERROR */
-        #status-msg {
-            color: #d63031;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 16px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-weight: 600;
-            display: none;
-        }
-
-        /* VIDEO PREVIEW CARD */
-        #video-card {
-            display: none;
-            width: 100%;
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            text-align: left;
-        }
-
-        .player-wrapper {
-            width: 100%;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #000;
-            margin-bottom: 15px;
-            position: relative;
-            min-height: 280px;
-        }
-
-        iframe, video {
-            width: 100%;
-            height: 320px;
-            border: none;
-            display: block;
-        }
-
-        .video-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-
-        .format-selection {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        select {
-            flex: 1;
-            padding: 12px;
-            background: var(--input-bg);
-            border: 1px solid #ccc;
-            color: var(--input-text);
-            border-radius: 6px;
-            outline: none;
-            font-size: 1rem;
-        }
-
-        .btn-download-file {
-            background: #113f67;
-            color: #fff;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        /* PROGRESS BAR */
-        .progress-box {
-            display: none;
-            margin-top: 15px;
-        }
-
-        .progress-bar-bg {
-            background: #dfe6e9;
-            border-radius: 10px;
-            height: 10px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #2ed573;
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .progress-text {
-            font-size: 0.85rem;
-            color: #747d8c;
-            margin-top: 6px;
-            text-align: center;
-        }
-
-        /* INFO CARD INFERIOR */
-        .info-card {
-            width: 100%;
-            background: var(--bg-card-info);
-            backdrop-filter: blur(4px);
-            border-radius: 4px;
-            padding: 16px 20px;
-            text-align: left;
-            color: var(--text-info);
-            font-size: 0.92rem;
-            line-height: 1.5;
-            margin-bottom: 30px;
-        }
-
-        .info-card p {
-            margin-bottom: 10px;
-        }
-
-        .info-card p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* FOOTER BRANDING */
-        .footer-banner {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #ffffff;
-            font-size: 1.05rem;
-            font-weight: 600;
-            padding: 10px 0;
-        }
-
-        /* MODAL / MENU LATERAL */
-        .menu-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
-            justify-content: flex-end;
-        }
-
-        .menu-modal.active {
-            display: flex;
-        }
-
-        .menu-content {
-            width: 280px;
-            height: 100%;
-            background: var(--menu-bg);
-            color: #fff;
-            padding: 25px 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -4px 0 15px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-
-        .menu-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .menu-close {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 1.4rem;
-            cursor: pointer;
-        }
-
-        .menu-link {
-            padding: 12px 10px;
-            color: #f1f2f6;
-            text-decoration: none;
-            font-size: 1.05rem;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-        }
-
-        .menu-link:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        /* POPUP TEXT MODAL */
-        .info-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1100;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .info-modal.active {
-            display: flex;
-        }
-
-        .info-modal-box {
-            background: #ffffff;
-            color: #333;
-            max-width: 500px;
-            width: 100%;
-            border-radius: 12px;
-            padding: 25px;
-            position: relative;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        body.dark-mode .info-modal-box {
-            background: #1a1d24;
-            color: #f1f2f6;
-        }
-
-        .info-modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: transparent;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: inherit;
-        }
-    </style>
+    /* Modal Idiomas */
+    .lang-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--drawer-bg);
+      color: var(--drawer-text);
+      padding: 22px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 320px;
+      display: none;
+      z-index: 101;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+    .lang-modal h3 {
+      margin-bottom: 16px;
+      font-size: 17px;
+      color: var(--text-brand);
+    }
+    .lang-opt {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--drawer-text);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .lang-opt:hover {
+      background: rgba(255,255,255,0.15);
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo-wrapper" onclick="location.reload()">
-            <div class="logo-img">
-                <img src="/logo.png" alt="Logo">
-            </div>
-            <div class="logo-text">
-                <span class="part-yet">YET</span><span class="part-load">Load</span>
-            </div>
-        </div>
+  <!-- Overlay -->
+  <div class="overlay" id="modalOverlay" onclick="fecharModais()"></div>
 
-        <div class="header-controls">
-            <button class="icon-btn" id="btn-theme" title="Modo Claro/Escuro">
-                <i class="fa-solid fa-sun"></i>
-            </button>
-            
-            <button class="icon-btn" id="btn-lang" title="Idioma">
-                <i class="fa-solid fa-globe"></i>
-            </button>
-            <div class="lang-dropdown" id="lang-dropdown">
-                <button class="lang-item" onclick="setLanguage('pt')">🇧🇷 Português</button>
-                <button class="lang-item" onclick="setLanguage('en')">🇺🇸 English</button>
-                <button class="lang-item" onclick="setLanguage('es')">🇪🇸 Español</button>
-            </div>
+  <!-- Menu Lateral (Drawer) -->
+  <aside class="drawer" id="sideDrawer">
+    <div class="drawer-header">
+      <h3 id="txtMenuTitle">Menu YETLoad</h3>
+      <button class="drawer-close" onclick="fecharModais()">&times;</button>
+    </div>
+    <div class="drawer-item" onclick="alert('YETLoad: O mais rápido e completo baixador de vídeos.')">
+      <span>ℹ️</span> <span id="txtAbout">Sobre o YETLoad</span>
+    </div>
+    <div class="drawer-item" onclick="alert('Termos de Uso: Uso pessoal e educacional.')">
+      <span>📜</span> <span id="txtTerms">Termos de Uso</span>
+    </div>
+    <div class="drawer-item" onclick="alert('Privacidade: Não armazenamos nenhum dado do usuário.')">
+      <span>🔒</span> <span id="txtPrivacy">Política de Privacidade</span>
+    </div>
+    <div class="drawer-item" onclick="alert('Contato: suporte@yetload.com')">
+      <span>✉️</span> <span id="txtContact">Contato</span>
+    </div>
+  </aside>
 
-            <button class="icon-btn menu-btn" id="btn-menu" title="Menu">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-        </div>
+  <!-- Modal de Idioma -->
+  <div class="lang-modal" id="langModal">
+    <h3 id="txtSelectLang">Selecione o Idioma</h3>
+    <button class="lang-opt" onclick="mudarIdioma('pt')">🇧🇷 Português</button>
+    <button class="lang-opt" onclick="mudarIdioma('en')">🇺🇸 English</button>
+    <button class="lang-opt" onclick="mudarIdioma('es')">🇪🇸 Español</button>
+  </div>
+
+  <div class="app-container">
+    <!-- Header Top -->
+    <header class="header-bar">
+      <div class="brand-group">
+        <!-- Logo PNG original carregada da pasta -->
+        <img src="logo.png" alt="YETLoad Logo" class="brand-img-logo" />
+        <div class="brand-name">YET<span>Load</span></div>
+      </div>
+      <div class="actions-group">
+        <!-- Botão de Brilho / Tema -->
+        <button class="top-btn" title="Alternar Brilho" onclick="alternarTema()">
+          <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.3 2a10 10 0 0 0-.19 14 9.92 9.92 0 0 0 7.9 4 10 10 0 1 1-7.71-18z"/>
+          </svg>
+        </button>
+        <!-- Botão de Idioma -->
+        <button class="top-btn" title="Idioma" onclick="abrirModalIdioma()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </button>
+        <!-- Botão de Menu -->
+        <button class="top-btn btn-menu" title="Menu" onclick="abrirDrawerMenu()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
+      </div>
     </header>
 
-    <div class="main-container">
-        <h2 class="hero-title" id="t-hero-title">Baixador de Vídeos do YouTube</h2>
-        <div class="hero-brand">
-            <span class="bar">|</span> <span class="yet">YET</span><span class="load">Load</span>
-        </div>
+    <!-- Main Title -->
+    <section class="hero-title-section">
+      <div class="hero-subtitle" id="txtSubtitle">Baixador de Vídeos do YouTube</div>
+      <div class="hero-main-title">
+        <span class="sep">|</span> YET <span class="highlight">Load</span>
+      </div>
+    </section>
 
-        <div class="search-container">
-            <input type="text" id="video-url" class="search-input" placeholder="Cole seu link de vídeo do YouTube">
-            <button class="clear-btn" id="btn-clear" title="Limpar link"><i class="fa-solid fa-xmark"></i></button>
-            <button class="btn-paste" id="btn-paste">
-                <i class="fa-solid fa-clipboard"></i> <span id="t-btn-paste">Colar</span>
-            </button>
-        </div>
-
-        <button class="btn-main-action" id="btn-analyze">
-            <i class="fa-solid fa-circle-arrow-down"></i> <span id="t-btn-analyze">Baixar</span>
-        </button>
-
-        <p id="status-msg"></p>
-
-        <div id="video-card">
-            <div class="player-wrapper" id="player-wrapper">
-                <!-- Injetado dinamicamente para garantir som 100% -->
-            </div>
-            <div id="video-title" class="video-title"></div>
-            
-            <div class="format-selection">
-                <select id="res-select"></select>
-                <button class="btn-download-file" id="btn-start-download">
-                    <span id="t-btn-save">Baixar Arquivo</span>
-                </button>
-            </div>
-
-            <div class="progress-box" id="progress-box">
-                <div class="progress-bar-bg">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="progress-text" id="progress-text">Iniciando... 0%</div>
-            </div>
-        </div>
-
-        <div class="info-card">
-            <p id="t-info-1">- YETLoad é um baixador de vídeos do YouTube gratuito e baseado na web e não é afiliado a nenhum software ou produtos pagos.</p>
-            <p id="t-info-2">- Agora oferecemos suporte à conversão de vídeos do YouTube para MP3 e M4A, incluindo faixas de áudio em vários idiomas. Experimente agora.</p>
-        </div>
-
-        <div class="footer-banner">
-            <div><i class="fa-solid fa-cloud"></i> <span id="t-footer-desc">Melhor Downloader do YouTube</span></div>
-            <div><i class="fa-solid fa-star"></i></div>
-        </div>
+    <!-- Search Input, Botão X e Botão Colar -->
+    <div class="input-wrapper">
+      <input type="text" id="urlInput" placeholder="https://youtu.be/..." autocomplete="off" oninput="verificarInput()" />
+      <button class="btn-clear" id="btnClear" title="Limpar" onclick="limparInput()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 13.41 12z"/></svg>
+      </button>
+      <button class="btn-paste" onclick="colarLink()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 2h-4.18C14.4.84 13.3 0 12 0c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 18H5V4h2v3h10V4h2v16z"/></svg>
+        <span id="txtPaste">Colar</span>
+      </button>
     </div>
 
-    <!-- Menu Lateral -->
-    <div class="menu-modal" id="menu-modal">
-        <div class="menu-content">
-            <div class="menu-header">
-                <h3>YETLoad</h3>
-                <button class="menu-close" id="btn-menu-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="menu-link" id="link-about">
-                <i class="fa-solid fa-users"></i> <span id="t-menu-about">Quem Somos</span>
-            </div>
-            <div class="menu-link" id="link-terms">
-                <i class="fa-solid fa-shield-halved"></i> <span id="t-menu-terms">Políticas de Uso</span>
-            </div>
-        </div>
+    <!-- Green Center Download Button -->
+    <button id="searchBtn" class="btn-submit-download" onclick="buscarVideo()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 11.586l2.293-2.293a1 1 0 0 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L11 13.586V7a1 1 0 0 1 2 0z"/></svg>
+      <span id="txtBtnSearch">Baixar</span>
+    </button>
+
+    <!-- Dynamic Result Box -->
+    <div id="result-box">
+      <div id="videoTitle" class="video-title"></div>
+      <div class="player-container" id="playerSlot"></div>
+
+      <select id="resolutionSelect"></select>
+      <button id="downloadBtn" class="btn-save-video" onclick="iniciarDownload()">Salvar no Aparelho</button>
+
+      <div class="progress-bar-container" id="progressBox">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="status-text" id="statusLabel"></div>
     </div>
 
-    <!-- Modal Informativo -->
-    <div class="info-modal" id="info-modal">
-        <div class="info-modal-box">
-            <button class="info-modal-close" id="btn-info-close"><i class="fa-solid fa-xmark"></i></button>
-            <h3 id="modal-title" style="margin-bottom: 15px;">Título</h3>
-            <div id="modal-body" style="font-size: 0.95rem; line-height: 1.6;">Conteúdo</div>
-        </div>
-    </div>
+    <!-- Description Box -->
+    <section class="description-card">
+      <p id="txtInfo1">- YETLoad é um baixador de vídeos do YouTube gratuito e baseado na web e não é afiliado a nenhum software ou produtos pagos.</p>
+      <p id="txtInfo2">- Agora oferecemos suporte à conversão de vídeos do YouTube para MP3 e M4A, incluindo faixas de áudio em vários idiomas. Experimente agora.</p>
+    </section>
 
-    <script>
-        const translations = {
-            pt: {
-                heroTitle: "Baixador de Vídeos do YouTube",
-                placeholder: "Cole seu link de vídeo do YouTube",
-                paste: "Colar",
-                analyze: "Baixar",
-                saveFile: "Baixar Arquivo",
-                info1: "- YETLoad é um baixador de vídeos do YouTube gratuito e baseado na web e não é afiliado a nenhum software ou produtos pagos.",
-                info2: "- Agora oferecemos suporte à conversão de vídeos do YouTube para MP3 e M4A, incluindo faixas de áudio em vários idiomas. Experimente agora.",
-                footerDesc: "Melhor Downloader do YouTube",
-                menuAbout: "Quem Somos",
-                menuTerms: "Políticas de Uso",
-                aboutTitle: "Quem Somos",
-                aboutText: "O YETLoad é uma ferramenta online de alta performance criada para simplificar o download e a reprodução de mídias da web de forma rápida, sem anúncios invasivos e 100% gratuita.",
-                termsTitle: "Políticas de Uso",
-                termsText: "O YETLoad destina-se exclusivamente para uso pessoal de conteúdos com direitos autorais livres ou autorizados pelo criador original. Não armazenamos vídeos em nossos servidores."
-            },
-            en: {
-                heroTitle: "YouTube Video Downloader",
-                placeholder: "Paste your YouTube video link here",
-                paste: "Paste",
-                analyze: "Download",
-                saveFile: "Download File",
-                info1: "- YETLoad is a free web-based video downloader and is not affiliated with any paid software or products.",
-                info2: "- We now support converting YouTube videos to MP3 and M4A, including multi-language audio tracks. Try it now.",
-                footerDesc: "Best YouTube Downloader",
-                menuAbout: "About Us",
-                menuTerms: "Terms of Use",
-                aboutTitle: "About Us",
-                aboutText: "YETLoad is a high-performance online tool created to simplify media downloading and playback cleanly, without invasive ads and 100% free.",
-                termsTitle: "Terms of Use",
-                termsText: "YETLoad is strictly intended for personal use of free-to-use or creator-authorized media content. We do not store videos on our servers."
-            },
-            es: {
-                heroTitle: "Descargador de Videos de YouTube",
-                placeholder: "Pega el enlace del video de YouTube aquí",
-                paste: "Pegar",
-                analyze: "Descargar",
-                saveFile: "Descargar Archivo",
-                info1: "- YETLoad es un descargador de videos gratuito basado en la web y no está afiliado a ningún software o producto de pago.",
-                info2: "- Ahora admitimos la conversión de videos de YouTube a MP3 e M4A, incluidas pistas de audio en varios idiomas. Pruébalo ahora.",
-                footerDesc: "El melhor descargador de YouTube",
-                menuAbout: "Quiénes Somos",
-                menuTerms: "Políticas de Uso",
-                aboutTitle: "Quiénes Somos",
-                aboutText: "YETLoad es una herramienta online de alto rendimiento creada para simplificar la descarga y reproducción de medios de forma rápida, sin publicidad invasiva y 100% gratuita.",
-                termsTitle: "Políticas de Uso",
-                termsText: "YETLoad está destinado estrictamente para uso personal de contenidos con derechos libres o autorizados por su creador. No almacenamos videos en nuestros servidores."
-            }
-        };
+    <!-- Footer -->
+    <footer class="footer-highlight">
+      <div class="footer-left">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+        <span id="txtFooter">Melhor Downloader do YouTube</span>
+      </div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    </footer>
+  </div>
 
-        let currentLang = 'pt';
+  <script>
+    let videoUrl = "";
 
-        function setLanguage(lang) {
-            currentLang = lang;
-            const t = translations[lang];
-            document.getElementById('t-hero-title').innerText = t.heroTitle;
-            document.getElementById('video-url').placeholder = t.placeholder;
-            document.getElementById('t-btn-paste').innerText = t.paste;
-            document.getElementById('t-btn-analyze').innerText = t.analyze;
-            document.getElementById('t-btn-save').innerText = t.saveFile;
-            document.getElementById('t-info-1').innerText = t.info1;
-            document.getElementById('t-info-2').innerText = t.info2;
-            document.getElementById('t-footer-desc').innerText = t.footerDesc;
-            document.getElementById('t-menu-about').innerText = t.menuAbout;
-            document.getElementById('t-menu-terms').innerText = t.menuTerms;
-            document.getElementById('lang-dropdown').classList.remove('active');
+    const translations = {
+      pt: {
+        subtitle: "Baixador de Vídeos do YouTube",
+        paste: "Colar",
+        btnSearch: "Baixar",
+        info1: "- YETLoad é um baixador de vídeos do YouTube gratuito e baseado na web e não é afiliado a nenhum software ou produtos pagos.",
+        info2: "- Agora oferecemos suporte à conversão de vídeos do YouTube para MP3 e M4A, incluindo faixas de áudio em vários idiomas. Experimente agora.",
+        footer: "Melhor Downloader do YouTube",
+        menuTitle: "Menu YETLoad",
+        about: "Sobre o YETLoad",
+        terms: "Termos de Uso",
+        privacy: "Política de Privacidade",
+        contact: "Contato",
+        selectLang: "Selecione o Idioma"
+      },
+      en: {
+        subtitle: "YouTube Video Downloader",
+        paste: "Paste",
+        btnSearch: "Download",
+        info1: "- YETLoad is a free web-based YouTube video downloader and is not affiliated with any paid software or products.",
+        info2: "- We now support converting YouTube videos to MP3 and M4A, including audio tracks in multiple languages. Try it now.",
+        footer: "Best YouTube Downloader",
+        menuTitle: "YETLoad Menu",
+        about: "About YETLoad",
+        terms: "Terms of Use",
+        privacy: "Privacy Policy",
+        contact: "Contact",
+        selectLang: "Select Language"
+      },
+      es: {
+        subtitle: "Descargador de Videos de YouTube",
+        paste: "Pegar",
+        btnSearch: "Descargar",
+        info1: "- YETLoad es un descargador de videos de YouTube gratuito baseado na web e não está afiliado a nenhum software ou produto de pago.",
+        info2: "- Agora admitimos la conversión de videos de YouTube a MP3 e M4A, incluidas pistas de audio en varios idiomas. Pruébelo agora.",
+        footer: "El Mejor Descargador de YouTube",
+        menuTitle: "Menú YETLoad",
+        about: "Acerca de YETLoad",
+        terms: "Términos de Uso",
+        privacy: "Política de Privacidad",
+        contact: "Contacto",
+        selectLang: "Seleccione el Idioma"
+      }
+    };
+
+    function mudarIdioma(lang) {
+      const t = translations[lang];
+      document.getElementById("txtSubtitle").innerText = t.subtitle;
+      document.getElementById("txtPaste").innerText = t.paste;
+      document.getElementById("txtBtnSearch").innerText = t.btnSearch;
+      document.getElementById("txtInfo1").innerText = t.info1;
+      document.getElementById("txtInfo2").innerText = t.info2;
+      document.getElementById("txtFooter").innerText = t.footer;
+      document.getElementById("txtMenuTitle").innerText = t.menuTitle;
+      document.getElementById("txtAbout").innerText = t.about;
+      document.getElementById("txtTerms").innerText = t.terms;
+      document.getElementById("txtPrivacy").innerText = t.privacy;
+      document.getElementById("txtContact").innerText = t.contact;
+      document.getElementById("txtSelectLang").innerText = t.selectLang;
+      fecharModais();
+    }
+
+    function alternarTema() {
+      document.documentElement.classList.toggle("light-mode");
+      const icon = document.getElementById("themeIcon");
+      if (document.documentElement.classList.contains("light-mode")) {
+        icon.innerHTML = `<path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>`;
+      } else {
+        icon.innerHTML = `<path d="M12.3 2a10 10 0 0 0-.19 14 9.92 9.92 0 0 0 7.9 4 10 10 0 1 1-7.71-18z"/>`;
+      }
+    }
+
+    function abrirDrawerMenu() {
+      document.getElementById("modalOverlay").style.display = "block";
+      document.getElementById("sideDrawer").classList.add("active");
+    }
+
+    function abrirModalIdioma() {
+      document.getElementById("modalOverlay").style.display = "block";
+      document.getElementById("langModal").style.display = "block";
+    }
+
+    function fecharModais() {
+      document.getElementById("modalOverlay").style.display = "none";
+      document.getElementById("sideDrawer").classList.remove("active");
+      document.getElementById("langModal").style.display = "none";
+    }
+
+    function verificarInput() {
+      const val = document.getElementById("urlInput").value;
+      document.getElementById("btnClear").style.display = val.length > 0 ? "flex" : "none";
+    }
+
+    function limparInput() {
+      document.getElementById("urlInput").value = "";
+      document.getElementById("btnClear").style.display = "none";
+      document.getElementById("urlInput").focus();
+    }
+
+    async function colarLink() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          document.getElementById("urlInput").value = text.trim();
+          verificarInput();
+        }
+      } catch (err) {
+        alert("Cole o link manualmente no campo.");
+      }
+    }
+
+    async function buscarVideo() {
+      const input = document.getElementById("urlInput").value.trim();
+      if (!input) return alert("Por favor, cole um link do YouTube.");
+
+      const btn = document.getElementById("searchBtn");
+      btn.disabled = true;
+      btn.innerHTML = "Carregando...";
+
+      try {
+        const res = await fetch("/api/info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: input })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Erro ao processar link.");
         }
 
-        const btnTheme = document.getElementById('btn-theme');
-        btnTheme.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            btnTheme.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
-        });
+        const data = await res.json();
+        videoUrl = input;
+        exibirResultado(data);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 11.586l2.293-2.293a1 1 0 0 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L11 13.586V7a1 1 0 0 1 2 0z"/></svg> <span id="txtBtnSearch">Baixar</span>`;
+      }
+    }
 
-        const btnLang = document.getElementById('btn-lang');
-        const langDropdown = document.getElementById('lang-dropdown');
-        btnLang.addEventListener('click', (e) => {
-            e.stopPropagation();
-            langDropdown.classList.toggle('active');
-        });
-        document.addEventListener('click', () => langDropdown.classList.remove('active'));
+    function exibirResultado(data) {
+      document.getElementById("result-box").style.display = "block";
+      document.getElementById("videoTitle").innerText = data.title;
 
-        const inputUrl = document.getElementById('video-url');
-        const btnClear = document.getElementById('btn-clear');
-        inputUrl.addEventListener('input', () => {
-            btnClear.style.display = inputUrl.value ? 'block' : 'none';
-        });
-        btnClear.addEventListener('click', () => {
-            inputUrl.value = '';
-            btnClear.style.display = 'none';
-            inputUrl.focus();
-        });
+      const slot = document.getElementById("playerSlot");
+      slot.innerHTML = "";
+      if (data.embed_url) {
+        slot.innerHTML = `<iframe src="${data.embed_url}" allowfullscreen></iframe>`;
+      } else if (data.direct_url) {
+        slot.innerHTML = `<video src="${data.direct_url}" controls></video>`;
+      }
 
-        const btnPaste = document.getElementById('btn-paste');
-        btnPaste.addEventListener('click', async () => {
-            try {
-                const text = await navigator.clipboard.readText();
-                inputUrl.value = text;
-                btnClear.style.display = 'block';
-            } catch (err) {
-                alert('Pressione Ctrl + V para colar.');
-            }
-        });
+      const select = document.getElementById("resolutionSelect");
+      select.innerHTML = "";
 
-        const btnMenu = document.getElementById('btn-menu');
-        const menuModal = document.getElementById('menu-modal');
-        const btnMenuClose = document.getElementById('btn-menu-close');
-        const infoModal = document.getElementById('info-modal');
-        const btnInfoClose = document.getElementById('btn-info-close');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
+      const optBest = document.createElement("option");
+      optBest.value = "best";
+      optBest.innerText = "Melhor Qualidade (MP4)";
+      select.appendChild(optBest);
 
-        btnMenu.addEventListener('click', () => menuModal.classList.add('active'));
-        btnMenuClose.addEventListener('click', () => menuModal.classList.remove('active'));
+      data.resolutions.forEach(res => {
+        const opt = document.createElement("option");
+        opt.value = res;
+        opt.innerText = res + "p (MP4)";
+        select.appendChild(opt);
+      });
 
-        document.getElementById('link-about').addEventListener('click', () => {
-            menuModal.classList.remove('active');
-            modalTitle.innerText = translations[currentLang].aboutTitle;
-            modalBody.innerText = translations[currentLang].aboutText;
-            infoModal.classList.add('active');
-        });
+      const optAudio = document.createElement("option");
+      optAudio.value = "audio_only";
+      optAudio.innerText = "Somente Áudio (MP3)";
+      select.appendChild(optAudio);
+      
+      document.getElementById("result-box").scrollIntoView({ behavior: 'smooth' });
+    }
 
-        document.getElementById('link-terms').addEventListener('click', () => {
-            menuModal.classList.remove('active');
-            modalTitle.innerText = translations[currentLang].termsTitle;
-            modalBody.innerText = translations[currentLang].termsText;
-            infoModal.classList.add('active');
-        });
+    async function iniciarDownload() {
+      const res = document.getElementById("resolutionSelect").value;
+      const taskId = "task_" + Math.random().toString(36).substring(2, 9);
+      
+      const btn = document.getElementById("downloadBtn");
+      btn.disabled = true;
+      
+      const progressBox = document.getElementById("progressBox");
+      const progressFill = document.getElementById("progressFill");
+      const statusLabel = document.getElementById("statusLabel");
 
-        btnInfoClose.addEventListener('click', () => infoModal.classList.remove('active'));
+      progressBox.style.display = "block";
+      progressFill.style.width = "0%";
+      statusLabel.innerText = "Iniciando download...";
 
-        const btnAnalyze = document.getElementById('btn-analyze');
-        const statusMsg = document.getElementById('status-msg');
-        const videoCard = document.getElementById('video-card');
-        const playerWrapper = document.getElementById('player-wrapper');
-        const videoTitle = document.getElementById('video-title');
-        const resSelect = document.getElementById('res-select');
-        const btnStartDownload = document.getElementById('btn-start-download');
-        const progressBox = document.getElementById('progress-box');
-        const progressFill = document.getElementById('progress-fill');
-        const progressText = document.getElementById('progress-text');
-
-        btnAnalyze.addEventListener('click', async () => {
-            const url = inputUrl.value.trim();
-            if (!url) {
-                showError("Por favor, cole um link de vídeo válido.");
-                return;
-            }
-
-            statusMsg.style.display = 'none';
-            btnAnalyze.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
-            btnAnalyze.disabled = true;
-
-            try {
-                const res = await fetch('/api/info', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || 'Erro ao carregar o vídeo');
-
-                videoTitle.innerText = data.title;
-                playerWrapper.innerHTML = '';
-
-                // Se houver embed disponível (YouTube / Tokyvideo), reproduz com som total
-                if (data.embed_url) {
-                    const iframe = document.createElement('iframe');
-                    iframe.src = data.embed_url;
-                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-                    iframe.allowFullscreen = true;
-                    playerWrapper.appendChild(iframe);
-                } else if (data.direct_url) {
-                    const video = document.createElement('video');
-                    video.src = data.direct_url;
-                    video.controls = true;
-                    video.playsInline = true;
-                    if (data.thumbnail) video.poster = data.thumbnail;
-                    playerWrapper.appendChild(video);
-                }
-
-                resSelect.innerHTML = '';
-                if (data.resolutions && data.resolutions.length > 0) {
-                    data.resolutions.forEach(r => {
-                        const opt = document.createElement('option');
-                        opt.value = r;
-                        opt.innerText = `Vídeo MP4 (${r}p)`;
-                        resSelect.appendChild(opt);
-                    });
-                } else {
-                    const opt = document.createElement('option');
-                    opt.value = 'best';
-                    opt.innerText = 'Melhor Qualidade (MP4)';
-                    resSelect.appendChild(opt);
-                }
-
-                const optAudio = document.createElement('option');
-                optAudio.value = 'audio_only';
-                optAudio.innerText = 'Apenas Áudio (MP3)';
-                resSelect.appendChild(optAudio);
-
-                videoCard.style.display = 'block';
-                progressBox.style.display = 'none';
-            } catch (e) {
-                showError("Falha ao analisar o link. Verifique a URL ou tente novamente.");
-            } finally {
-                btnAnalyze.innerHTML = '<i class="fa-solid fa-circle-arrow-down"></i> <span id="t-btn-analyze">' + translations[currentLang].analyze + '</span>';
-                btnAnalyze.disabled = false;
-            }
-        });
-
-        btnStartDownload.addEventListener('click', async () => {
-            const url = inputUrl.value.trim();
-            const resolution = resSelect.value;
-            const taskId = crypto.randomUUID();
-
-            btnStartDownload.disabled = true;
-            progressBox.style.display = 'block';
-            progressFill.style.width = '0%';
-            progressText.innerText = 'Processando... 0%';
-
-            const evtSource = new EventSource(`/api/progress/${taskId}`);
-            evtSource.onmessage = (e) => {
-                const [percent, status] = e.data.split('|');
-                progressFill.style.width = percent + '%';
-                if (status === 'downloading') {
-                    progressText.innerText = `Baixando... ${percent}%`;
-                } else if (status === 'converting') {
-                    progressText.innerText = `Convertendo formato...`;
-                } else if (status === 'finished') {
-                    progressText.innerText = `Download concluído!`;
-                    evtSource.close();
-                }
-            };
-
-            try {
-                const res = await fetch('/api/download', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, resolution, task_id: taskId })
-                });
-
-                if (!res.ok) throw new Error('Erro no download');
-
-                const blob = await res.blob();
-                const downloadUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                
-                const disposition = res.headers.get('content-disposition');
-                let filename = 'video.mp4';
-                if (disposition && disposition.indexOf('filename=') !== -1) {
-                    filename = decodeURIComponent(disposition.split('filename=')[1].replace(/"/g, ''));
-                }
-                
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            } catch (err) {
-                showError('Erro ao gerar o arquivo para download.');
-            } finally {
-                btnStartDownload.disabled = false;
-                if (evtSource) evtSource.close();
-            }
-        });
-
-        function showError(msg) {
-            statusMsg.innerText = msg;
-            statusMsg.style.display = 'block';
+      const evtSource = new EventSource(`/api/progress/${taskId}`);
+      evtSource.onmessage = (e) => {
+        const [percent, status] = e.data.split("|");
+        progressFill.style.width = percent + "%";
+        if (status === "downloading") {
+          statusLabel.innerText = `Baixando: ${percent}%`;
+        } else if (status === "converting") {
+          statusLabel.innerText = "Convertendo...";
+        } else if (status === "finished") {
+          statusLabel.innerText = "Finalizado!";
+          evtSource.close();
         }
-    </script>
+      };
+
+      try {
+        const resp = await fetch("/api/download", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: videoUrl,
+            resolution: res,
+            task_id: taskId
+          })
+        });
+
+        if (!resp.ok) throw new Error("Erro no download");
+
+        const blob = await resp.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        
+        const ext = res === "audio_only" ? "mp3" : "mp4";
+        a.download = `YETLoad.com.${ext}`;
+
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (err) {
+        alert("Erro durante o download.");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
 </body>
 </html>

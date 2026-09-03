@@ -10,12 +10,15 @@ from pydantic import BaseModel
 import yt_dlp
 
 app = FastAPI()
-
 tasks_progress = {}
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+COOKIE_PATH = os.path.join(BASE_DIR, "cookies.txt")
 
 COMMON_YDL_OPTS = {
     "quiet": True,
     "no_warnings": True,
+    "cookiefile": COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
 }
 
 class InfoRequest(BaseModel):
@@ -32,51 +35,54 @@ def remove_file(path: str):
 
 @app.post("/api/info")
 def get_video_info(data: InfoRequest):
+    url = data.url.strip()
+    if not (url.startswith("http://") or url.startswith("https://")):
+        raise HTTPException(status_code=400, detail="URL inválida. Cole um link completo.")
+
     try:
-        ydl_opts = dict(COMMON_YDL_OPTS)
+        ydl_opts = {k: v for k, v in COMMON_YDL_OPTS.items() if v is not None}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(data.url, download=False)
-            video_id = info.get("id")
-            resolutions = set()
-            
-            formats = info.get("formats", [])
-            for f in formats:
-                height = f.get("height")
-                vcodec = f.get("vcodec")
-                if height and vcodec != "none":
-                    resolutions.add(height)
-            
-            # Detecta reprodutor com áudio nativo por plataforma
-            embed_url = None
-            if "youtube.com" in data.url or "youtu.be" in data.url:
-                embed_url = f"https://www.youtube-nocookie.com/embed/{video_id}?autoplay=0"
-            elif "tokyvideo.com" in data.url:
-                parsed = urlparse(data.url)
-                path = parsed.path.replace("/br/video/", "/video/")
-                if path.startswith("/video/"):
-                    slug = path.replace("/video/", "")
-                    embed_url = f"https://www.tokyvideo.com/embed/{slug}"
-                else:
-                    embed_url = f"https://www.tokyvideo.com/embed/{video_id}"
+            info = ydl.extract_info(url, download=False)
 
-            # Busca stream com áudio e vídeo combinados caso precise de fallback
-            direct_url = None
-            for f in reversed(formats):
-                if f.get("vcodec") != "none" and f.get("acodec") != "none" and f.get("url"):
-                    direct_url = f.get("url")
-                    break
-            if not direct_url and formats:
-                direct_url = formats[-1].get("url")
+        video_id = info.get("id")
+        resolutions = set()
+        
+        formats = info.get("formats", [])
+        for f in formats:
+            height = f.get("height")
+            vcodec = f.get("vcodec")
+            if height and vcodec != "none":
+                resolutions.add(height)
+        
+        embed_url = None
+        if "youtube.com" in url or "youtu.be" in url:
+            embed_url = f"https://www.youtube-nocookie.com/embed/{video_id}?autoplay=0"
+        elif "tokyvideo.com" in url:
+            parsed = urlparse(url)
+            path = parsed.path.replace("/br/video/", "/video/")
+            if path.startswith("/video/"):
+                slug = path.replace("/video/", "")
+                embed_url = f"https://www.tokyvideo.com/embed/{slug}"
+            else:
+                embed_url = f"https://www.tokyvideo.com/embed/{video_id}"
 
-            proxy_stream_url = f"/api/stream?url={urllib.parse.quote(direct_url)}" if direct_url else None
+        direct_url = None
+        for f in reversed(formats):
+            if f.get("vcodec") != "none" and f.get("acodec") != "none" and f.get("url"):
+                direct_url = f.get("url")
+                break
+        if not direct_url and formats:
+            direct_url = formats[-1].get("url")
 
-            return {
-                "title": info.get("title"),
-                "thumbnail": info.get("thumbnail"),
-                "embed_url": embed_url,
-                "direct_url": proxy_stream_url or direct_url,
-                "resolutions": sorted(list(resolutions), reverse=True)
-            }
+        proxy_stream_url = f"/api/stream?url={urllib.parse.quote(direct_url)}" if direct_url else None
+
+        return {
+            "title": info.get("title"),
+            "thumbnail": info.get("thumbnail"),
+            "embed_url": embed_url,
+            "direct_url": proxy_stream_url or direct_url,
+            "resolutions": sorted(list(resolutions), reverse=True)
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -85,9 +91,7 @@ def stream_video(url: str):
     try:
         req = urllib.request.Request(
             url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            }
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
         )
         response = urllib.request.urlopen(req, timeout=20)
 
@@ -138,7 +142,7 @@ def download_video(data: DownloadRequest, background_tasks: BackgroundTasks):
         temp_dir = tempfile.mkdtemp()
         output_template = os.path.join(temp_dir, "%(title)s.%(ext)s")
         
-        ydl_opts = dict(COMMON_YDL_OPTS)
+        ydl_opts = {k: v for k, v in COMMON_YDL_OPTS.items() if v is not None}
         ydl_opts["outtmpl"] = output_template
         ydl_opts["progress_hooks"] = [progress_hook]
 
@@ -159,13 +163,13 @@ def download_video(data: DownloadRequest, background_tasks: BackgroundTasks):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(data.url, download=True)
             file_name = ydl.prepare_filename(info)
-            
-            if data.resolution == "audio_only":
-                file_name = os.path.splitext(file_name)[0] + ".mp3"
-            else:
-                base = os.path.splitext(file_name)[0]
-                if os.path.exists(base + ".mp4"):
-                    file_name = base + ".mp4"
+
+        if data.resolution == "audio_only":
+            file_name = os.path.splitext(file_name)[0] + ".mp3"
+        else:
+            base = os.path.splitext(file_name)[0]
+            if os.path.exists(base + ".mp4"):
+                file_name = base + ".mp4"
 
         tasks_progress[task_id] = {"status": "finished", "percent": 100}
         background_tasks.add_task(remove_file, file_name)
