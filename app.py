@@ -33,11 +33,6 @@ def remove_file(path: str):
 
 
 def get_ydl_options(url: str, custom_opts=None):
-  """Retorna configurações do yt-dlp.
-
-  Aplica cookies e regras especiais APENAS se for YouTube para não quebrar
-  outros sites.
-  """
   opts = {
       'quiet': True,
       'no_warnings': True,
@@ -49,7 +44,6 @@ def get_ydl_options(url: str, custom_opts=None):
       },
   }
 
-  # Aplica cookie e configs avançadas EXCLUSIVAMENTE para o YouTube
   if 'youtube.com' in url or 'youtu.be' in url:
     if os.path.exists(COOKIE_PATH):
       opts['cookiefile'] = COOKIE_PATH
@@ -65,7 +59,7 @@ def get_video_info(data: InfoRequest):
   url = data.url.strip()
   if not (url.startswith('http://') or url.startswith('https://')):
     raise HTTPException(
-        status_code=400 detail='URL inválida. Cole um link completo.'
+        status_code=400, detail='URL inválida. Cole um link completo.'
     )
 
   try:
