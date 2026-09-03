@@ -259,12 +259,18 @@
       overflow: hidden;
       margin-bottom: 14px;
       background: #000000;
+      position: relative;
     }
     .player-container iframe,
     .player-container video {
       width: 100%;
       height: 100%;
       border: none;
+    }
+    .player-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     select {
       width: 100%;
@@ -686,7 +692,7 @@
 
     async function buscarVideo() {
       const input = document.getElementById("urlInput").value.trim();
-      if (!input) return alert("Por favor, cole um link do YouTube.");
+      if (!input) return alert("Por favor, cole um link do vídeo.");
 
       const btn = document.getElementById("searchBtn");
       btn.disabled = true;
@@ -699,16 +705,17 @@
           body: JSON.stringify({ url: input })
         });
 
+        const data = await res.json();
+
         if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || "Erro ao processar link.");
+          const msg = typeof data.detail === 'string' ? data.detail : (data.detail ? JSON.stringify(data.detail) : 'Erro ao processar URL');
+          throw new Error(msg);
         }
 
-        const data = await res.json();
         videoUrl = input;
         exibirResultado(data);
       } catch (err) {
-        alert(err.message);
+        alert(err.message || "Erro ao buscar informações do vídeo.");
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 11.586l2.293-2.293a1 1 0 0 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L11 13.586V7a1 1 0 0 1 2 0z"/></svg> <span id="txtBtnSearch">Baixar</span>`;
@@ -717,12 +724,15 @@
 
     function exibirResultado(data) {
       document.getElementById("result-box").style.display = "block";
-      document.getElementById("videoTitle").innerText = data.title;
+      document.getElementById("videoTitle").innerText = data.title || "Vídeo sem título";
 
       const slot = document.getElementById("playerSlot");
       slot.innerHTML = "";
+
       if (data.embed_url) {
-        slot.innerHTML = `<iframe src="${data.embed_url}" allowfullscreen></iframe>`;
+        slot.innerHTML = `<iframe src="${data.embed_url}" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+      } else if (data.thumbnail) {
+        slot.innerHTML = `<img src="${data.thumbnail}" alt="Thumbnail do Vídeo" />`;
       } else if (data.direct_url) {
         slot.innerHTML = `<video src="${data.direct_url}" controls></video>`;
       }
@@ -735,12 +745,14 @@
       optBest.innerText = "Melhor Qualidade (MP4)";
       select.appendChild(optBest);
 
-      data.resolutions.forEach(res => {
-        const opt = document.createElement("option");
-        opt.value = res;
-        opt.innerText = res + "p (MP4)";
-        select.appendChild(opt);
-      });
+      if (data.resolutions && data.resolutions.length > 0) {
+        data.resolutions.forEach(res => {
+          const opt = document.createElement("option");
+          opt.value = res;
+          opt.innerText = res + "p (MP4)";
+          select.appendChild(opt);
+        });
+      }
 
       const optAudio = document.createElement("option");
       optAudio.value = "audio_only";
